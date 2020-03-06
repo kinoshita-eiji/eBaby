@@ -5,6 +5,8 @@ import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -749,6 +751,58 @@ public class ActionTest {
 
         assertThat(logger.findMessage(fileName, message), is(false));
 
+    }
+
+    @Test
+    public void AuctionIsNotStartedBeforeStartTime() {
+        Users users = TestHelper.setUpUsers();
+        User seller = TestHelper.getDefaultSeller();
+        seller = users.login(seller.userName, seller.password);
+        Auction auction = TestHelper.getDefaultAuction(seller);
+
+        Auctions auctions = new Auctions();
+        auctions.create(auction);
+
+        auctions.handleAuctionEvents((new Date()).getTime());
+
+        Auction handledAuction = auctions.getList().get(0);
+        assertThat(handledAuction.status, is(AuctionStatus.UNSTARTED));
+    }
+
+    @Test
+    public void AuctionIsStartedBetweenWindowTime() {
+        Users users = TestHelper.setUpUsers();
+        User seller = TestHelper.getDefaultSeller();
+        seller = users.login(seller.userName, seller.password);
+        Auction auction = TestHelper.getDefaultAuction(seller);
+
+        Auctions auctions = new Auctions();
+        auctions.create(auction);
+
+        long unixtime = auction.startTime.atZone(ZoneId.systemDefault()).toEpochSecond();
+
+        auctions.handleAuctionEvents((unixtime + 10) * 1000);
+
+        Auction handledAuction = auctions.getList().get(0);
+        assertThat(handledAuction.status, is(AuctionStatus.STARTED));
+    }
+
+    @Test
+    public void AuctionIsClosedAfterWindowTime() {
+        Users users = TestHelper.setUpUsers();
+        User seller = TestHelper.getDefaultSeller();
+        seller = users.login(seller.userName, seller.password);
+        Auction auction = TestHelper.getDefaultAuction(seller);
+
+        Auctions auctions = new Auctions();
+        auctions.create(auction);
+
+        long unixtime = auction.endTime.atZone(ZoneId.systemDefault()).toEpochSecond();
+
+        auctions.handleAuctionEvents((unixtime + 10) * 1000);
+
+        Auction handledAuction = auctions.getList().get(0);
+        assertThat(handledAuction.status, is(AuctionStatus.CLOSED));
     }
 
     class MockOffHours implements Hours {
