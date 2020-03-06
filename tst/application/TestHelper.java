@@ -25,10 +25,13 @@ public class TestHelper {
     public static Users setUpUsers() {
         Users users = new Users();
         User seller = getDefaultSeller();
+        User preferredSeller = getPreferredSeller();
         User bidder = getDefaultBidder();
         users.register(seller);
+        users.register(preferredSeller);
         users.register(bidder);
         users.promoteToSeller(seller);
+        users.promoteToPreferredSeller(preferredSeller);
         return users;
     }
 
@@ -43,6 +46,19 @@ public class TestHelper {
                 itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
         return createdAuction;
     }
+
+    public static Auction getCheapAuction(User loggedinUser) {
+        String itemName = "item-name";
+        String itemDescription = "説明文";
+        ItemCategory itemCategory = ItemCategory.OTHER;
+        Integer startingPrice = new Integer(10);
+        LocalDateTime startTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
+        LocalDateTime endTime = LocalDateTime.of(2020, 3, 11, 9, 59, 59);
+        Auction createdAuction = loggedinUser.createAuction(
+                itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
+        return createdAuction;
+    }
+
 
     public static Auction getDownloadSoftwareAuction(User loggedinUser) {
         String itemName = "item-name";
@@ -66,6 +82,15 @@ public class TestHelper {
         Auction createdAuction = loggedinUser.createAuction(
                 itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
         return createdAuction;
+    }
+
+    public static User getPreferredSeller() {
+        String firstName = "Devid";
+        String lastName = "Bernstein";
+        String userEmail = "devid@example.com";
+        String userName = "d-bernstein";
+        String password = "PASSWORD";
+        return new User(firstName, lastName, userEmail, userName, password);
     }
 
 }

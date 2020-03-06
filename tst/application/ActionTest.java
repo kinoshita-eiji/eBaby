@@ -617,4 +617,76 @@ public class ActionTest {
 
         assertThat(logger.findMessage(fileName, message), is(false));
     }
+
+    @Test
+    public void ShippingFeeOfPreferredSellerIsFreeWhenPriceIsOverThan50() {
+        Users users = TestHelper.setUpUsers();
+        User seller = TestHelper.getPreferredSeller();
+        seller = users.login(seller.userName, seller.password);
+        Auction auction = TestHelper.getCheapAuction(seller);
+        auction.onStart();
+
+        User bidder = TestHelper.getDefaultBidder();
+        Integer bidPrice = new Integer(50);
+        bidder = users.login(bidder.userName, bidder.password);
+        bidder.bid(auction, bidPrice);
+
+        auction.onClose();
+
+        assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice)));
+    }
+
+    @Test
+    public void ShippingFeeOfPreferredSellerIsNotFreeWhenPriceIsLessThan50() {
+        Users users = TestHelper.setUpUsers();
+        User seller = TestHelper.getPreferredSeller();
+        seller = users.login(seller.userName, seller.password);
+        Auction auction = TestHelper.getCheapAuction(seller);
+        auction.onStart();
+
+        User bidder = TestHelper.getDefaultBidder();
+        Integer bidPrice = new Integer(49);
+        bidder = users.login(bidder.userName, bidder.password);
+        bidder.bid(auction, bidPrice);
+
+        auction.onClose();
+
+        assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice + 10)));
+    }
+
+    @Test
+    public void ShippingFeeOfPreferredSellerIsHalfForCar() {
+        Users users = TestHelper.setUpUsers();
+        User seller = TestHelper.getPreferredSeller();
+        seller = users.login(seller.userName, seller.password);
+        Auction auction = TestHelper.getCarAuction(seller);
+        auction.onStart();
+
+        User bidder = TestHelper.getDefaultBidder();
+        Integer bidPrice = new Integer(2000);
+        bidder = users.login(bidder.userName, bidder.password);
+        bidder.bid(auction, bidPrice);
+
+        auction.onClose();
+
+        assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice + 1000 / 2)));
+    }
+
+    @Test
+    public void TransactionFeeOfPreferredSellerIs1Percent() {
+        Users users = TestHelper.setUpUsers();
+        User seller = TestHelper.getPreferredSeller();
+        seller = users.login(seller.userName, seller.password);
+        Auction auction = TestHelper.getDefaultAuction(seller);
+        auction.onStart();
+
+        User bidder = TestHelper.getDefaultBidder();
+        Integer bidPrice = new Integer(2000);
+        bidder = users.login(bidder.userName, bidder.password);
+        bidder.bid(auction, bidPrice);
+
+        auction.onClose();
+
+        assertThat(auction.sellerAmount, is(new BigDecimal(bidPrice - 20)));
+    }
 }

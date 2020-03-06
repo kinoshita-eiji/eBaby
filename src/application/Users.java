@@ -64,4 +64,11 @@ public class Users {
         registeredUser.put(foundUser.userName, foundUser);
     }
 
+    public void promoteToPreferredSeller(User user) {
+        User foundUser = findByUserName(user.userName);
+
+        foundUser.isPreferredSeller = true;
+        registeredUser.put(foundUser.userName, foundUser);
+    }
+
 }

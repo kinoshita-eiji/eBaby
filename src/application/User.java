@@ -10,6 +10,7 @@ public class User {
     String password;
     boolean isLoggedIn;
     boolean isSeller;
+    boolean isPreferredSeller;
 
     User(String firstName, String lastName, String userEmail, String userName, String password) {
         this.firstName = firstName;
@@ -23,7 +24,7 @@ public class User {
         if (!this.isLoggedIn) {
             throw new NotAuthenticatedException("You are not logged in");
         }
-        if (!this.isSeller) {
+        if (!this.isSeller && !this.isPreferredSeller) {
             throw new NotAuthorizedAsSellerException("You are not a seller");
         }
         if (!startTime.isAfter(LocalDateTime.now())) {

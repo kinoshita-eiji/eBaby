@@ -20,7 +20,13 @@ public class BidderAmountProcessor extends AmountProcessor {
         if (auction.itemCategory == ItemCategory.DOWNLOAD_SOFTWARE) {
             return new BigDecimal(0);
         } else if (auction.itemCategory == ItemCategory.CAR) {
-            return new BigDecimal(1000);
+            if (auction.seller.isPreferredSeller) {
+                return new BigDecimal(500);
+            } else {
+                return new BigDecimal(1000);
+            }
+        } else if (auction.seller.isPreferredSeller && auction.highestPrice >= 50) {
+            return new BigDecimal(0);
         } else {
             return new BigDecimal(10);
         }
