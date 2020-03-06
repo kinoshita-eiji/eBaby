@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.tobeagile.training.ebaby.services.AuctionLogger;
+import com.tobeagile.training.ebaby.services.Hours;
 import com.tobeagile.training.ebaby.services.PostOffice;
 
 public class ActionTest {
@@ -688,5 +689,77 @@ public class ActionTest {
         auction.onClose();
 
         assertThat(auction.sellerAmount, is(new BigDecimal(bidPrice - 20)));
+    }
+
+    @Test
+    public void LoggingWhenOffHours() {
+        Users users = TestHelper.setUpUsers();
+        User seller = TestHelper.getDefaultSeller();
+        seller = users.login(seller.userName, seller.password);
+        Auction auction = TestHelper.getDefaultAuction(seller);
+        auction.onStart();
+
+        User bidder = TestHelper.getDefaultBidder();
+        Integer bidPrice = new Integer(2000);
+        bidder = users.login(bidder.userName, bidder.password);
+        bidder.bid(auction, bidPrice);
+
+        AuctionLogger logger = AuctionLogger.getInstance();
+        String fileName = "C:\\workspace\\eBaby\\log\\offhour-transaction.log";
+        logger.clearLog(fileName);
+
+        OnCloseProcessor processor = OnCloseProcessorFactory.getProcessor(auction, new MockOffHours(true));
+        processor.process(auction);
+
+        String message = String.format("itemName:%s seller:%s bidder:%s bidPrice:%s",
+                "item-name",
+                "k-clark",
+                "e-kinoshita",
+                bidPrice);
+
+        assertThat(logger.findMessage(fileName, message), is(true));
+
+    }
+
+    @Test
+    public void NoLoggingWhenOnHours() {
+        Users users = TestHelper.setUpUsers();
+        User seller = TestHelper.getDefaultSeller();
+        seller = users.login(seller.userName, seller.password);
+        Auction auction = TestHelper.getDefaultAuction(seller);
+        auction.onStart();
+
+        User bidder = TestHelper.getDefaultBidder();
+        Integer bidPrice = new Integer(2000);
+        bidder = users.login(bidder.userName, bidder.password);
+        bidder.bid(auction, bidPrice);
+
+        AuctionLogger logger = AuctionLogger.getInstance();
+        String fileName = "C:\\workspace\\eBaby\\log\\offhour-transaction.log";
+        logger.clearLog(fileName);
+
+        OnCloseProcessor processor = OnCloseProcessorFactory.getProcessor(auction, new MockOffHours(false));
+        processor.process(auction);
+
+        String message = String.format("itemName:%s seller:%s bidder:%s bidPrice:%s",
+                "item-name",
+                "k-clark",
+                "e-kinoshita",
+                bidPrice);
+
+        assertThat(logger.findMessage(fileName, message), is(false));
+
+    }
+
+    class MockOffHours implements Hours {
+        boolean returnValue;
+
+        public MockOffHours(boolean returnValue) {
+            this.returnValue = returnValue;
+        }
+
+        public boolean isOffHours() {
+            return returnValue;
+        }
     }
 }

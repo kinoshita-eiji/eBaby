@@ -1,16 +1,19 @@
 package application;
 
 import com.tobeagile.training.ebaby.services.AuctionLogger;
+import com.tobeagile.training.ebaby.services.Hours;
 
-//TODO Ask about Logging Format
-public class CarTransactionLogProcessor extends OnCloseProcessor {
+public class OffHourLogProcessor extends OnCloseProcessor {
 
-    public CarTransactionLogProcessor(OnCloseProcessor processor) {
+    Hours offHours;
+
+    public OffHourLogProcessor(OnCloseProcessor processor, Hours offhours) {
         super(processor);
+        this.offHours = offhours;
     }
 
     public String getFileName() {
-        return "C:\\workspace\\eBaby\\log\\car-transaction.log";
+        return "C:\\workspace\\eBaby\\log\\offhour-transaction.log";
     }
 
     public void process(Auction auction) {
@@ -20,10 +23,11 @@ public class CarTransactionLogProcessor extends OnCloseProcessor {
                 auction.highestBidder != null ? auction.highestBidder.userName : "---",
                 auction.highestPrice);
 
-        if (auction.itemCategory == ItemCategory.CAR) {
+        if (this.offHours.isOffHours()) {
             AuctionLogger.getInstance().log(getFileName(), message);
         }
         super.process(auction);
     }
+
 
 }

@@ -1,26 +1,36 @@
 package application;
 
+import com.tobeagile.training.ebaby.services.Hours;
+import com.tobeagile.training.ebaby.services.OffHours;
+
 public class OnCloseProcessorFactory {
 
     public OnCloseProcessorFactory() {
     }
 
-    public static OnCloseProcessor getProcessor(Auction auction) {
+    public static OnCloseProcessor getProcessor(Auction auction, Hours offHours) {
         if (auction.highestBidder == null) {
             return new SellerAmountProcessor(
                     new BidderAmountProcessor(
                             new CarTransactionLogProcessor(
                                     new ExpensiveTransactionLogProcessor(
-                                            new WithoutBidAuctionCloseNotifier()))));
+                                            new OffHourLogProcessor(
+                                                    new WithoutBidAuctionCloseNotifier(),
+                                                    offHours)))));
 
         } else {
             return new SellerAmountProcessor(
                     new BidderAmountProcessor(
                             new CarTransactionLogProcessor(
                                     new ExpensiveTransactionLogProcessor(
-                                            new WithBidAuctionCloseNotifier()))));
-
+                                            new OffHourLogProcessor(
+                                                    new WithBidAuctionCloseNotifier(),
+                                                    offHours)))));
         }
+    }
+
+    public static OnCloseProcessor getProcessor(Auction auction) {
+        return getProcessor(auction, OffHours.getInstance());
     }
 
 }
