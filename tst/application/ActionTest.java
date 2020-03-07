@@ -13,10 +13,18 @@ import com.tobeagile.training.ebaby.services.AuctionLogger;
 import com.tobeagile.training.ebaby.services.Hours;
 import com.tobeagile.training.ebaby.services.PostOffice;
 
+import application.exception.AuctionIsNotStartedException;
+import application.exception.BadCredentialException;
+import application.exception.DuplicatedUserException;
+import application.exception.InvalidAuctionTimeException;
+import application.exception.InvalidBidException;
+import application.exception.NotAuthenticatedException;
+import application.exception.NotAuthorizedAsSellerException;
+
 public class ActionTest {
 
     @Test
-    public void ユーザが登録できる() {
+    public void UsersCanRegisterUser() {
         Users users = new Users();
 
         String firstName = "Clark";
@@ -35,7 +43,7 @@ public class ActionTest {
     }
 
     @Test
-    public void 同じユーザ名では登録できない() {
+    public void UsersCantRegisterSameNameUser() {
         Users users = TestHelper.setUpUsers();
         User user = TestHelper.getDefaultSeller();
         try {
@@ -46,7 +54,7 @@ public class ActionTest {
     }
 
     @Test
-    public void 正しくログインできる() {
+    public void UserCanLogin() {
         Users users = TestHelper.setUpUsers();
         User user = TestHelper.getDefaultSeller();
         User logginedUser = users.login(user.userName, user.password);
@@ -55,7 +63,7 @@ public class ActionTest {
     }
 
     @Test
-    public void 間違えたパスワードでログインできない() {
+    public void UserCantLoginWithWrongPassword() {
         Users users = TestHelper.setUpUsers();
         User user = TestHelper.getDefaultSeller();
         try {
@@ -67,7 +75,7 @@ public class ActionTest {
     }
 
     @Test
-    public void 登録されていないユーザでログインできない() {
+    public void UserCantLoginWithoutRegistration() {
         Users users = TestHelper.setUpUsers();
         User user = TestHelper.getDefaultSeller();
         try {

@@ -2,6 +2,12 @@ package application;
 
 import java.time.LocalDateTime;
 
+import application.exception.AuctionIsNotStartedException;
+import application.exception.InvalidAuctionTimeException;
+import application.exception.InvalidBidException;
+import application.exception.NotAuthenticatedException;
+import application.exception.NotAuthorizedAsSellerException;
+
 public class User {
     String firstName;
     String lastName;

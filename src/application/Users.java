@@ -2,6 +2,10 @@ package application;
 
 import java.util.HashMap;
 
+import application.exception.BadCredentialException;
+import application.exception.DuplicatedUserException;
+import application.exception.NotAuthenticatedException;
+
 public class Users {
 
     HashMap<String, User> registeredUser = new HashMap<String, User>();

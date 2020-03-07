@@ -1,4 +1,4 @@
-package application;
+package application.exception;
 
 public class DuplicatedUserException extends RuntimeException {
 

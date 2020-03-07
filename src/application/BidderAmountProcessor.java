@@ -3,6 +3,7 @@ package application;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+
 public class BidderAmountProcessor extends AmountProcessor {
 
     public BidderAmountProcessor(OnCloseProcessor processor) {
@@ -16,6 +17,7 @@ public class BidderAmountProcessor extends AmountProcessor {
         super.process(auction);
     }
 
+    // TODO メソッドの実装が酷い・・・
     private BigDecimal calculateShippingFee(Auction auction) {
         if (auction.itemCategory == ItemCategory.DOWNLOAD_SOFTWARE) {
             return new BigDecimal(0);
