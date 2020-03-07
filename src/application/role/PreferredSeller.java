@@ -1,4 +1,4 @@
-package application;
+package application.role;
 
 public class PreferredSeller extends Seller {
 

@@ -1,9 +1,11 @@
-package application;
+package application.fee;
+
+import application.Auction;
 
 public class ShippingFeeFactory {
 
     public static ShippingFee getInstance(Auction auction) {
-        switch (auction.itemCategory) {
+        switch (auction.getItemCategory()) {
         case DOWNLOAD_SOFTWARE:
             return new DownloadSoftwareShippingFee(auction);
         case CAR:

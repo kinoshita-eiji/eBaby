@@ -37,11 +37,11 @@ public class ActionTest {
         User user = new User(firstName, lastName, userEmail, userName, password);
         User registeredUser = users.register(user);
 
-        assertThat(registeredUser.firstName, is(firstName));
-        assertThat(registeredUser.lastName, is(lastName));
-        assertThat(registeredUser.userEmail, is(userEmail));
-        assertThat(registeredUser.userName, is(userName));
-        assertThat(registeredUser.password, is(password));
+        assertThat(registeredUser.getFirstName(), is(firstName));
+        assertThat(registeredUser.getLastName(), is(lastName));
+        assertThat(registeredUser.getUserEmail(), is(userEmail));
+        assertThat(registeredUser.getUserName(), is(userName));
+        assertThat(registeredUser.getPassword(), is(password));
     }
 
     @Test
@@ -59,8 +59,8 @@ public class ActionTest {
     public void UserCanLogin() {
         Users users = TestHelper.setUpUsers();
         User user = TestHelper.getDefaultSeller();
-        User logginedUser = users.login(user.userName, user.password);
-        assertThat(logginedUser.isLoggedIn, is(true));
+        User logginedUser = users.login(user.getUserName(), user.getPassword());
+        assertThat(logginedUser.isLoggedIn(), is(true));
 
     }
 
@@ -69,7 +69,7 @@ public class ActionTest {
         Users users = TestHelper.setUpUsers();
         User user = TestHelper.getDefaultSeller();
         try {
-            users.login(user.userName, "WRONG-PASSWORD");
+            users.login(user.getUserName(), "WRONG-PASSWORD");
             Assert.fail("Logged in with wrong password");
         } catch (BadCredentialException e) {
         }
@@ -81,7 +81,7 @@ public class ActionTest {
         Users users = TestHelper.setUpUsers();
         User user = TestHelper.getDefaultSeller();
         try {
-            users.login("wrong-userName", user.password);
+            users.login("wrong-userName", user.getPassword());
             Assert.fail("Logged in with wrong userName");
         } catch (BadCredentialException e) {
         }
@@ -92,9 +92,9 @@ public class ActionTest {
     public void UserCanLogoutWhenLoggedIn() {
         Users users = TestHelper.setUpUsers();
         User user = TestHelper.getDefaultSeller();
-        users.login(user.userName, user.password);
-        users.logout(user.userName);
-        assertThat(user.isLoggedIn, is(false));
+        users.login(user.getUserName(), user.getPassword());
+        users.logout(user.getUserName());
+        assertThat(user.isLoggedIn(), is(false));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class ActionTest {
         Users users = TestHelper.setUpUsers();
         User user = TestHelper.getDefaultSeller();
         try {
-            users.logout(user.userName);
+            users.logout(user.getUserName());
             Assert.fail("You can't logout when not logged in");
         } catch (NotAuthenticatedException e) {
         }
@@ -119,7 +119,7 @@ public class ActionTest {
         Users users = TestHelper.setUpUsers();
         User user = TestHelper.getDefaultSeller();
         users.promoteToSeller(user);
-        User loggedinUser = users.login(user.userName, user.password);
+        User loggedinUser = users.login(user.getUserName(), user.getPassword());
         assertThat(loggedinUser.isSeller(), is(true));
     }
 
@@ -127,7 +127,7 @@ public class ActionTest {
     public void SellerCanCreateAuction() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
 
         String itemName = "item-name";
         String itemDescription = "説明文";
@@ -139,19 +139,19 @@ public class ActionTest {
         Auction createdAuction = seller.createAuction(
                 itemName, itemDescription, itemCategory,startingPrice, startTime, endTime);
 
-        assertThat(createdAuction.itemName, is(itemName));
-        assertThat(createdAuction.seller.userName, is(seller.userName));
+        assertThat(createdAuction.getItemName(), is(itemName));
+        assertThat(createdAuction.getSeller().getUserName(), is(seller.getUserName()));
         assertThat(createdAuction.itemDescription, is(itemDescription));
         assertThat(createdAuction.startingPrice, is(startingPrice));
-        assertThat(createdAuction.startTime, is(startTime));
-        assertThat(createdAuction.endTime, is(endTime));
+        assertThat(createdAuction.getStartTime(), is(startTime));
+        assertThat(createdAuction.getEndTime(), is(endTime));
     }
 
     @Test
     public void NotSellerCantCreateAuction() {
         Users users = TestHelper.setUpUsers();
         User bidder = TestHelper.getDefaultBidder();
-        User loggedinUser = users.login(bidder.userName, bidder.password);
+        User loggedinUser = users.login(bidder.getUserName(), bidder.getPassword());
 
         try {
             loggedinUser.createAuction("item-name", "item-description", ItemCategory.OTHER, 1000, LocalDateTime.of(2020, 3, 6, 10, 0, 0),
@@ -180,7 +180,7 @@ public class ActionTest {
         Users users = TestHelper.setUpUsers();
         User user = TestHelper.getDefaultSeller();
         users.promoteToSeller(user);
-        User loggedinUser = users.login(user.userName, user.password);
+        User loggedinUser = users.login(user.getUserName(), user.getPassword());
 
         try {
             loggedinUser.createAuction("item-name", "item-description", ItemCategory.OTHER, 1000, LocalDateTime.of(2020, 2, 4, 10, 0, 0),
@@ -196,7 +196,7 @@ public class ActionTest {
         Users users = TestHelper.setUpUsers();
         User user = TestHelper.getDefaultSeller();
         users.promoteToSeller(user);
-        User loggedinUser = users.login(user.userName, user.password);
+        User loggedinUser = users.login(user.getUserName(), user.getPassword());
 
         try {
             loggedinUser.createAuction("item-name", "item-description", ItemCategory.OTHER, 1000, LocalDateTime.of(2020, 3, 10, 10, 0, 0),
@@ -212,7 +212,7 @@ public class ActionTest {
         Users users = TestHelper.setUpUsers();
         User user = TestHelper.getDefaultSeller();
         users.promoteToSeller(user);
-        User loggedinUser = users.login(user.userName, user.password);
+        User loggedinUser = users.login(user.getUserName(), user.getPassword());
 
         LocalDateTime sameTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
 
@@ -227,7 +227,7 @@ public class ActionTest {
     public void AuctionCanStart() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
 
         Auction createdAuction = TestHelper.getDefaultAuction(seller);
 
@@ -243,7 +243,7 @@ public class ActionTest {
     public void AuctionCanClose() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
 
         Auction createdAuction = TestHelper.getDefaultAuction(seller);
 
@@ -259,10 +259,10 @@ public class ActionTest {
     public void AuthenticatedBidderCanBidStartedAuction() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
 
         User bidder = TestHelper.getDefaultBidder();
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
 
         Auction auction = TestHelper.getDefaultAuction(seller);
         auction.onStart();
@@ -277,7 +277,7 @@ public class ActionTest {
     public void UnauthenticatedBidderCantBidStartedAuction() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
 
         User bidder = TestHelper.getDefaultBidder();
 
@@ -296,10 +296,10 @@ public class ActionTest {
     public void AuthenticatedBidderCantBidUnstartedAuction() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
 
         User bidder = TestHelper.getDefaultBidder();
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
 
         Auction auction = TestHelper.getDefaultAuction(seller);
 
@@ -315,10 +315,10 @@ public class ActionTest {
     public void AuthenticatedBidderCantBidLowerThanStartingPrice() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
 
         User bidder = TestHelper.getDefaultBidder();
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
 
         Auction auction = TestHelper.getDefaultAuction(seller);
         auction.onStart();
@@ -335,10 +335,10 @@ public class ActionTest {
     public void AuthenticatedBidderCantBidLowerPrice() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
 
         User bidder = TestHelper.getDefaultBidder();
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
 
         Auction auction = TestHelper.getDefaultAuction(seller);
         auction.onStart();
@@ -358,7 +358,7 @@ public class ActionTest {
     public void AuthenticatedBidderCantBidOwnAuction() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
 
         Auction auction = TestHelper.getDefaultAuction(seller);
         auction.onStart();
@@ -375,14 +375,14 @@ public class ActionTest {
     public void AuctionClosedWithoutBidNotifyToSeller() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getDefaultAuction(seller);
         auction.onStart();
         PostOffice postOffice = PostOffice.getInstance();
         postOffice.clear();
         auction.onClose();
         assertThat(
-                postOffice.findEmail(seller.userEmail, "Sorry, your auction for <item-name> did not have any bidders"),
+                postOffice.findEmail(seller.getUserEmail(), "Sorry, your auction for <item-name> did not have any bidders"),
                 is("<sendEMail address=\"kent@example.com\" >Sorry, your auction for <item-name> did not have any bidders</sendEmail>\n"));
     }
 
@@ -390,20 +390,20 @@ public class ActionTest {
     public void AuctionClosedWithBidNotifyToSeller() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getDefaultAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         PostOffice postOffice = PostOffice.getInstance();
         postOffice.clear();
         auction.onClose();
         assertThat(
-                postOffice.findEmail(seller.userEmail,
+                postOffice.findEmail(seller.getUserEmail(),
                         "Your <item-name> auction sold to bidder <kinoshita@example.com> for <2000>."),
                 is("<sendEMail address=\"kent@example.com\" >Your <item-name> auction sold to bidder <kinoshita@example.com> for <2000>.</sendEmail>\n"));
     }
@@ -412,20 +412,20 @@ public class ActionTest {
     public void AuctionClosedWithBidNotifyToHighestBidder() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getDefaultAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         PostOffice postOffice = PostOffice.getInstance();
         postOffice.clear();
         auction.onClose();
         assertThat(
-                postOffice.findEmail(bidder.userEmail,
+                postOffice.findEmail(bidder.getUserEmail(),
                         "Congratulations! You won an auction for a <item-name> from <kent@example.com> for <2000>."),
                 is("<sendEMail address=\"kinoshita@example.com\" >Congratulations! You won an auction for a <item-name> from <kent@example.com> for <2000>.</sendEmail>\n"));
     }
@@ -434,98 +434,98 @@ public class ActionTest {
     public void calculateSallerAmount() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getDefaultAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(1999);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
-        assertThat(auction.sellerAmount, is(new BigDecimal(1960)));
+        assertThat(auction.getSellerAmount(), is(new BigDecimal(1960)));
     }
 
     @Test
     public void CalculateBidderAmountForDownloadSoftware() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getDownloadSoftwareAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
-        assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice)));
+        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice)));
     }
 
     @Test
     public void CalculateBidderAmountForOther() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getDefaultAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
-        assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice + 10)));
+        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice + 10)));
     }
 
     @Test
     public void CalculateBidderAmountForCheapCar() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getCarAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(49999);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
-        assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice + 1000)));
+        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice + 1000)));
     }
 
     @Test
     public void CalculateBidderAmountForExpensiveCar() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getCarAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(50001);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
-        assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice + 1000 + 2000)));
+        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice + 1000 + 2000)));
     }
 
     @Test
     public void CarTransactionIsLoggedToCarLog() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getCarAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(50001);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         AuctionLogger logger = AuctionLogger.getInstance();
@@ -547,13 +547,13 @@ public class ActionTest {
     public void OtherTransactionIsNotLoggedToCarLog() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getDefaultAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(50001);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         AuctionLogger logger = AuctionLogger.getInstance();
@@ -575,13 +575,13 @@ public class ActionTest {
     public void ExpensiveTransactionIsLogged() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getCarAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(10000);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         AuctionLogger logger = AuctionLogger.getInstance();
@@ -603,13 +603,13 @@ public class ActionTest {
     public void CheapTransactionIsNotLogged() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getCarAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(9999);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         AuctionLogger logger = AuctionLogger.getInstance();
@@ -631,85 +631,85 @@ public class ActionTest {
     public void ShippingFeeOfPreferredSellerIsFreeWhenPriceIsOverThan50() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getPreferredSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getCheapAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(50);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
 
-        assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice)));
+        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice)));
     }
 
     @Test
     public void ShippingFeeOfPreferredSellerIsNotFreeWhenPriceIsLessThan50() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getPreferredSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getCheapAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(49);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
 
-        assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice + 10)));
+        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice + 10)));
     }
 
     @Test
     public void ShippingFeeOfPreferredSellerIsHalfForCar() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getPreferredSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getCarAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
 
-        assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice + 1000 / 2)));
+        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice + 1000 / 2)));
     }
 
     @Test
     public void TransactionFeeOfPreferredSellerIs1Percent() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getPreferredSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getDefaultAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
 
-        assertThat(auction.sellerAmount, is(new BigDecimal(bidPrice - 20)));
+        assertThat(auction.getSellerAmount(), is(new BigDecimal(bidPrice - 20)));
     }
 
     @Test
     public void LoggingWhenOffHours() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getDefaultAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         AuctionLogger logger = AuctionLogger.getInstance();
@@ -733,13 +733,13 @@ public class ActionTest {
     public void NoLoggingWhenOnHours() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getDefaultAuction(seller);
         auction.onStart();
 
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
-        bidder = users.login(bidder.userName, bidder.password);
+        bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
         AuctionLogger logger = AuctionLogger.getInstance();
@@ -763,16 +763,16 @@ public class ActionTest {
     public void AuctionIsNotStartedBeforeStartTime() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getDefaultAuction(seller);
 
         Auctions auctions = new Auctions();
         auctions.create(auction);
 
-        BetterAuctionTimer timer = new BetterAuctionTimer();
+        AuctionTimer timer = new AuctionTimer();
         timer.checkAuction(auctions);
 
-        long now = TestHelper.ldtToEpochMilliSecond(auction.startTime) - 1000;
+        long now = TestHelper.ldtToEpochMilliSecond(auction.getStartTime()) - 1000;
         timer.timerTick(now);
 
         Auction handledAuction = auctions.getList().get(0);
@@ -783,16 +783,16 @@ public class ActionTest {
     public void AuctionIsStartedBetweenWindowTime() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getDefaultAuction(seller);
 
         Auctions auctions = new Auctions();
         auctions.create(auction);
 
-        BetterAuctionTimer timer = new BetterAuctionTimer();
+        AuctionTimer timer = new AuctionTimer();
         timer.checkAuction(auctions);
 
-        long now = TestHelper.ldtToEpochMilliSecond(auction.startTime) + 1000;
+        long now = TestHelper.ldtToEpochMilliSecond(auction.getStartTime()) + 1000;
         timer.timerTick(now);
 
         Auction handledAuction = auctions.getList().get(0);
@@ -803,16 +803,16 @@ public class ActionTest {
     public void AuctionIsClosedAfterWindowTime() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
-        seller = users.login(seller.userName, seller.password);
+        seller = users.login(seller.getUserName(), seller.getPassword());
         Auction auction = TestHelper.getDefaultAuction(seller);
 
         Auctions auctions = new Auctions();
         auctions.create(auction);
 
-        BetterAuctionTimer timer = new BetterAuctionTimer();
+        AuctionTimer timer = new AuctionTimer();
         timer.checkAuction(auctions);
 
-        long now = TestHelper.ldtToEpochMilliSecond(auction.endTime) + 1000;
+        long now = TestHelper.ldtToEpochMilliSecond(auction.getEndTime()) + 1000;
         timer.timerTick(now);
 
         Auction handledAuction = auctions.getList().get(0);

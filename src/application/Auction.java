@@ -10,17 +10,17 @@ import application.processor.OnCloseProcessor;
 import application.processor.OnCloseProcessorFactory;
 
 public class Auction {
-    User seller;
-    String itemName;
-    String itemDescription;
-    ItemCategory itemCategory;
-    Integer startingPrice;
-    LocalDateTime startTime;
-    LocalDateTime endTime;
-    AuctionStatus status;
-    BigDecimal sellerAmount;
-    BigDecimal bidderAmount;
-    Bid highestBid;
+    private User seller;
+    private String itemName;
+    private String itemDescription;
+    private ItemCategory itemCategory;
+    private Integer startingPrice;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private AuctionStatus status;
+    private BigDecimal sellerAmount;
+    private BigDecimal bidderAmount;
+    private Bid highestBid;
 
     public User getSeller() {
         return seller;
@@ -142,7 +142,7 @@ public class Auction {
     }
 
     public void acceptBid(Bid bid) {
-        if (bid.bidder.userName.equals(this.seller.userName)) {
+        if (bid.bidder.getUserName().equals(this.seller.getUserName())) {
             throw new InvalidBidException("Bidder can't bid own auction");
         }
         if (this.status != AuctionStatus.STARTED) {

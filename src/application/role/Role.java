@@ -1,7 +1,11 @@
-package application;
+package application.role;
 
 import java.time.LocalDateTime;
 
+import application.Auction;
+import application.Bid;
+import application.ItemCategory;
+import application.User;
 import application.exception.NotAuthorizedAsSellerException;
 
 public class Role {

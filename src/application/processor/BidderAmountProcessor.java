@@ -3,8 +3,8 @@ package application.processor;
 import java.math.BigDecimal;
 
 import application.Auction;
-import application.LuxuryTaxFactory;
-import application.ShippingFeeFactory;
+import application.fee.LuxuryTaxFactory;
+import application.fee.ShippingFeeFactory;
 
 public class BidderAmountProcessor extends AmountProcessor {
 

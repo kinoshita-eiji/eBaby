@@ -3,15 +3,17 @@ package application;
 import java.time.LocalDateTime;
 
 import application.exception.NotAuthenticatedException;
+import application.role.Bidder;
+import application.role.Role;
 
 public class User {
-    String firstName;
-    String lastName;
-    String userEmail;
-    String userName;
-    String password;
-    boolean isLoggedIn;
-    Role role;
+    private String firstName;
+    private String lastName;
+    private String userEmail;
+    private String userName;
+    private String password;
+    private boolean isLoggedIn;
+    private Role role;
 
     public String getFirstName() {
         return firstName;

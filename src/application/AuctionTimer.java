@@ -6,11 +6,11 @@ import java.util.TimerTask;
 
 import com.tobeagile.training.ebaby.services.Auctionable;
 
-public class BetterAuctionTimer {
+public class AuctionTimer {
     private Timer timer;
     private Auctionable auctions;
 
-    public BetterAuctionTimer() {
+    public AuctionTimer() {
     }
 
     public void checkAuction(Auctionable auctions) {

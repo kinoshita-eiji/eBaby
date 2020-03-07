@@ -1,7 +1,9 @@
-package application;
+package application.fee;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+
+import application.Auction;
 
 public class TransactionFee {
 

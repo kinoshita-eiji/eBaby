@@ -1,6 +1,8 @@
-package application;
+package application.fee;
 
 import java.math.BigDecimal;
+
+import application.Auction;
 
 public class OtherShippingFee extends ShippingFee {
 

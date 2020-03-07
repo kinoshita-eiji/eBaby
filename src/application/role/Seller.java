@@ -1,6 +1,10 @@
-package application;
+package application.role;
 
 import java.time.LocalDateTime;
+
+import application.Auction;
+import application.ItemCategory;
+import application.User;
 
 public class Seller extends Role {
 
