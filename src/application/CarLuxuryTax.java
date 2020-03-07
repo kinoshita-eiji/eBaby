@@ -5,13 +5,24 @@ import java.math.RoundingMode;
 
 public class CarLuxuryTax extends LuxuryTax {
 
+    int taxedThreshold = 50000;
+    double taxRate = 0.04;
+
+    public int getTaxedThreshold() {
+        return taxedThreshold;
+    }
+
+    public double getTaxRate() {
+        return taxRate;
+    }
+
     public CarLuxuryTax(Auction auction) {
         super(auction);
     }
 
     public BigDecimal calculate() {
-        if (auction.getHighestPrice() >= 50000) {
-            return new BigDecimal(auction.getHighestPrice() * 0.04).setScale(0, RoundingMode.DOWN);
+        if (getTaxedThreshold() <= auction.getHighestPrice()) {
+            return new BigDecimal(auction.getHighestPrice() * getTaxRate()).setScale(0, RoundingMode.DOWN);
         } else {
             return new BigDecimal(0);
         }

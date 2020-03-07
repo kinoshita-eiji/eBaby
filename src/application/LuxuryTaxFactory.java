@@ -3,10 +3,9 @@ package application;
 public class LuxuryTaxFactory {
 
     public static LuxuryTax getInstance(Auction auction) {
-        switch (auction.itemCategory) {
-        case CAR:
+        if (auction.itemCategory == ItemCategory.CAR) {
             return new CarLuxuryTax(auction);
-        default:
+        } else {
             return new LuxuryTax(auction);
         }
     }

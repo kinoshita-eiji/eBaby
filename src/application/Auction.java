@@ -76,4 +76,8 @@ public class Auction {
     public boolean hasBid() {
         return getHighestBidder() != null;
     }
+
+    public boolean isPreferred() {
+        return this.seller.isPreferredSeller();
+    }
 }

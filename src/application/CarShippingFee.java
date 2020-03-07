@@ -4,16 +4,19 @@ import java.math.BigDecimal;
 
 public class CarShippingFee extends ShippingFee {
 
+    int defaultShippingFee = 1000;
+    int preferredShippingFee = 500;
+
     public CarShippingFee(Auction auction) {
         super(auction);
     }
 
     @Override
     BigDecimal calculate() {
-        if (auction.seller.isPreferredSeller()) {
-            return new BigDecimal(500);
+        if (auction.isPreferred()) {
+            return new BigDecimal(preferredShippingFee);
         } else {
-            return new BigDecimal(1000);
+            return new BigDecimal(defaultShippingFee);
         }
     }
 

@@ -8,12 +8,13 @@ public class OtherShippingFee extends ShippingFee {
         super(auction);
     }
 
+    public boolean isFree() {
+        return auction.isPreferred() && 50 <= auction.getHighestPrice();
+    }
+
     @Override
     BigDecimal calculate() {
-        if (auction.seller.isPreferredSeller() && auction.getHighestPrice() >= 50) {
-            return new BigDecimal(0);
-        }
-        return new BigDecimal(10);
+        return new BigDecimal(isFree() ? 0 : 10);
     }
 
 }
