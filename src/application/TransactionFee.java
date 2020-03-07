@@ -11,7 +11,7 @@ public class TransactionFee {
     }
 
     public BigDecimal calculate() {
-        return new BigDecimal(auction.highestPrice * getRate()).setScale(0, RoundingMode.DOWN);
+        return new BigDecimal(auction.getHighestPrice() * getRate()).setScale(0, RoundingMode.DOWN);
     }
 
     protected double getRate() {

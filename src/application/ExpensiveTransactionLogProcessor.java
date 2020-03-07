@@ -23,10 +23,10 @@ public class ExpensiveTransactionLogProcessor extends OnCloseProcessor {
         String message = String.format("itemName:%s seller:%s bidder:%s bidPrice:%s",
                 auction.itemName,
                 auction.seller.userName,
-                auction.highestBidder != null ? auction.highestBidder.userName : "---",
-                auction.highestPrice);
+                auction.hasBid() ? auction.getHighestBidder().userName : "---",
+                auction.getHighestPrice());
 
-        if (10000 <= auction.highestPrice) {
+        if (10000 <= auction.getHighestPrice()) {
             AuctionLogger.getInstance().log(getFileName(), message);
         }
         super.process(auction);

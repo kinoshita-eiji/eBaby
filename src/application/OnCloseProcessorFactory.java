@@ -9,7 +9,7 @@ public class OnCloseProcessorFactory {
     }
 
     public static OnCloseProcessor getProcessor(Auction auction, Hours offHours) {
-        if (auction.highestBidder == null) {
+        if (!auction.hasBid()) {
             return new SellerAmountProcessor(
                     new BidderAmountProcessor(
                             new CarTransactionLogProcessor(

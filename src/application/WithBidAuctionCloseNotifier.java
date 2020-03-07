@@ -12,9 +12,9 @@ public class WithBidAuctionCloseNotifier extends AuctionCloseNotifier {
     public void process(Auction auction) {
 
         String itemName = auction.itemName;
-        User highestBidder = auction.highestBidder;
+        User highestBidder = auction.getHighestBidder();
         User seller = auction.seller;
-        Integer highestPrice = auction.highestPrice;
+        Integer highestPrice = auction.getHighestPrice();
 
         PostOffice postOffice = PostOffice.getInstance();
 

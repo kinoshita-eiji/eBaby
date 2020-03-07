@@ -267,8 +267,8 @@ public class ActionTest {
 
         Integer bidPrice = new Integer(2000);
         bidder.offerBid(auction, bidPrice);
-        assertThat(auction.highestBidder, is(bidder));
-        assertThat(auction.highestPrice, is(bidPrice));
+        assertThat(auction.getHighestBidder(), is(bidder));
+        assertThat(auction.getHighestPrice(), is(bidPrice));
     }
 
     @Test

@@ -14,7 +14,7 @@ public class Role {
     }
 
     public void offerBid(Auction auction, Bid bid) {
-        throw new RuntimeException("You cant' bid");
+        auction.acceptBid(bid);
     }
 
     public boolean isSeller() {

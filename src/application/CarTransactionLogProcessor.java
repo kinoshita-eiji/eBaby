@@ -17,8 +17,8 @@ public class CarTransactionLogProcessor extends OnCloseProcessor {
         String message = String.format("itemName:%s seller:%s bidder:%s bidPrice:%s",
                 auction.itemName,
                 auction.seller.userName,
-                auction.highestBidder != null ? auction.highestBidder.userName : "---",
-                auction.highestPrice);
+                auction.hasBid() ? auction.getHighestBidder().userName : "---",
+                auction.getHighestPrice());
 
         if (auction.itemCategory == ItemCategory.CAR) {
             AuctionLogger.getInstance().log(getFileName(), message);

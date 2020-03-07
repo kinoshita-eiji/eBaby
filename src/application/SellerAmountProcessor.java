@@ -15,7 +15,7 @@ public class SellerAmountProcessor extends AmountProcessor {
         } else {
             fee = new TransactionFee(auction);
         }
-        auction.sellerAmount = new BigDecimal(auction.highestPrice).subtract(fee.calculate());
+        auction.sellerAmount = new BigDecimal(auction.getHighestPrice()).subtract(fee.calculate());
         super.process(auction);
     }
 

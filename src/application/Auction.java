@@ -18,9 +18,7 @@ public class Auction {
     AuctionStatus status;
     BigDecimal sellerAmount;
     BigDecimal bidderAmount;
-
-    Integer highestPrice;
-    User highestBidder;
+    Bid highestBid;
 
     public Auction(User seller, String itemName, String itemDescription, ItemCategory itemCategory, Integer startingPrice, LocalDateTime startTime,
             LocalDateTime endTime) {
@@ -40,7 +38,7 @@ public class Auction {
         this.startTime = startTime;
         this.endTime = endTime;
         this.status = AuctionStatus.UNSTARTED;
-        this.highestPrice = startingPrice;
+        this.highestBid = new Bid(null, startingPrice);
     }
 
     public void onStart() {
@@ -51,19 +49,31 @@ public class Auction {
         this.status = AuctionStatus.CLOSED;
         OnCloseProcessor processor = OnCloseProcessorFactory.getProcessor(this);
         processor.process(this);
-
     }
 
     public void acceptBid(Bid bid) {
+        if (bid.bidder.userName.equals(this.seller.userName)) {
+            throw new InvalidBidException("Bidder can't bid own auction");
+        }
         if (this.status != AuctionStatus.STARTED) {
             throw new AuctionIsNotStartedException("Auction is not started");
         }
-        if (bid.price <= this.highestPrice) {
+        if (bid.price <= getHighestPrice()) {
             throw new InvalidBidException("Bid price must be higher than current price");
         }
-        this.highestBidder = bid.bidder;
-        this.highestPrice = bid.price;
-
+        this.highestBid = bid;
     }
 
+    public User getHighestBidder() {
+        return this.highestBid.bidder;
+    }
+
+
+    public Integer getHighestPrice() {
+        return this.highestBid.price;
+    }
+
+    public boolean hasBid() {
+        return getHighestBidder() != null;
+    }
 }

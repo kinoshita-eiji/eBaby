@@ -20,8 +20,8 @@ public class OffHourLogProcessor extends OnCloseProcessor {
         String message = String.format("itemName:%s seller:%s bidder:%s bidPrice:%s",
                 auction.itemName,
                 auction.seller.userName,
-                auction.highestBidder != null ? auction.highestBidder.userName : "---",
-                auction.highestPrice);
+                auction.hasBid() ? auction.getHighestBidder().userName : "---",
+                auction.getHighestPrice());
 
         if (this.offHours.isOffHours()) {
             AuctionLogger.getInstance().log(getFileName(), message);

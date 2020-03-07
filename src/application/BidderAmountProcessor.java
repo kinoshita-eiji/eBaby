@@ -9,7 +9,7 @@ public class BidderAmountProcessor extends AmountProcessor {
     }
 
     public void process(Auction auction) {
-        auction.bidderAmount = new BigDecimal(auction.highestPrice)
+        auction.bidderAmount = new BigDecimal(auction.getHighestPrice())
                 .add(ShippingFeeFactory.getInstance(auction).calculate())
                 .add(LuxuryTaxFactory.getInstance(auction).calculate());
         super.process(auction);

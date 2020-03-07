@@ -10,8 +10,8 @@ public class CarLuxuryTax extends LuxuryTax {
     }
 
     public BigDecimal calculate() {
-        if (auction.highestPrice >= 50000) {
-            return new BigDecimal(auction.highestPrice * 0.04).setScale(0, RoundingMode.DOWN);
+        if (auction.getHighestPrice() >= 50000) {
+            return new BigDecimal(auction.getHighestPrice() * 0.04).setScale(0, RoundingMode.DOWN);
         } else {
             return new BigDecimal(0);
         }

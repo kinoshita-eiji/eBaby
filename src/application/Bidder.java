@@ -12,9 +12,4 @@ public class Bidder extends Role {
     public boolean isPreferredSeller() {
         return false;
     }
-
-    public void offerBid(Auction auction, Bid bid) {
-        auction.acceptBid(bid);
-
-    }
 }

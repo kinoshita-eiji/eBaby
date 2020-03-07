@@ -10,7 +10,7 @@ public class OtherShippingFee extends ShippingFee {
 
     @Override
     BigDecimal calculate() {
-        if (auction.seller.isPreferredSeller() && auction.highestPrice >= 50) {
+        if (auction.seller.isPreferredSeller() && auction.getHighestPrice() >= 50) {
             return new BigDecimal(0);
         }
         return new BigDecimal(10);
