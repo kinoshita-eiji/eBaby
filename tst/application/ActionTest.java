@@ -109,7 +109,7 @@ public class ActionTest {
     @Test
     public void UserIsNotASeller() {
         User user = TestHelper.getDefaultSeller();
-        assertThat(user.isSeller, is(false));
+        assertThat(user.isSeller(), is(false));
     }
 
     @Test
@@ -118,7 +118,7 @@ public class ActionTest {
         User user = TestHelper.getDefaultSeller();
         users.promoteToSeller(user);
         User loggedinUser = users.login(user.userName, user.password);
-        assertThat(loggedinUser.isSeller, is(true));
+        assertThat(loggedinUser.isSeller(), is(true));
     }
 
     @Test

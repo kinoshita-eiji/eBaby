@@ -10,7 +10,7 @@ public class CarShippingFee extends ShippingFee {
 
     @Override
     BigDecimal calculate() {
-        if (auction.seller.isPreferredSeller) {
+        if (auction.seller.isPreferredSeller()) {
             return new BigDecimal(500);
         } else {
             return new BigDecimal(1000);

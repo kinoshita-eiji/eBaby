@@ -10,4 +10,12 @@ public class Seller extends Role {
     public Auction createAuction(User seller, String itemName, String itemDescription, ItemCategory itemCategory, Integer startingPrice, LocalDateTime startTime, LocalDateTime endTime) {
         return new Auction(seller, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
     }
+
+    public boolean isSeller() {
+        return true;
+    }
+
+    public boolean isPreferredSeller() {
+        return false;
+    }
 }

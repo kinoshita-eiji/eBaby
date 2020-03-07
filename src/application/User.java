@@ -13,8 +13,6 @@ public class User {
     String userName;
     String password;
     boolean isLoggedIn;
-    boolean isSeller;
-    boolean isPreferredSeller;
     Role role;
 
     User(String firstName, String lastName, String userEmail, String userName, String password) {
@@ -23,7 +21,7 @@ public class User {
         this.userEmail = userEmail;
         this.userName = userName;
         this.password = password;
-        this.role = new Role();
+        this.role = new Bidder();
     }
 
     public Auction createAuction(String itemName, String itemDescription, ItemCategory itemCategory, Integer startingPrice, LocalDateTime startTime, LocalDateTime endTime) {
@@ -49,6 +47,14 @@ public class User {
 
         auction.highestBidder = this;
         auction.highestPrice = price;
+    }
+
+    public boolean isSeller() {
+        return role.isSeller();
+    }
+
+    public boolean isPreferredSeller() {
+        return role.isPreferredSeller();
     }
 
 }

@@ -69,8 +69,7 @@ public class Users {
 
     public void promoteToPreferredSeller(User user) {
         User foundUser = findByUserName(user.userName);
-
-        foundUser.isPreferredSeller = true;
+        foundUser.role = new PreferredSeller();
         registeredUser.put(foundUser.userName, foundUser);
     }
 

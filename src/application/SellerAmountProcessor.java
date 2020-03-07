@@ -10,7 +10,7 @@ public class SellerAmountProcessor extends AmountProcessor {
 
     public void process(Auction auction) {
         TransactionFee fee;
-        if (auction.seller.isPreferredSeller) {
+        if (auction.seller.isPreferredSeller()) {
             fee = new PrefferredTransactionFee(auction);
         } else {
             fee = new TransactionFee(auction);
