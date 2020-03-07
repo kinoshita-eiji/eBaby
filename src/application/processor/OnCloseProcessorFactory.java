@@ -1,7 +1,9 @@
-package application;
+package application.processor;
 
 import com.tobeagile.training.ebaby.services.Hours;
 import com.tobeagile.training.ebaby.services.OffHours;
+
+import application.Auction;
 
 public class OnCloseProcessorFactory {
 

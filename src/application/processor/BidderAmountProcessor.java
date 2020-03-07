@@ -1,6 +1,10 @@
-package application;
+package application.processor;
 
 import java.math.BigDecimal;
+
+import application.Auction;
+import application.LuxuryTaxFactory;
+import application.ShippingFeeFactory;
 
 public class BidderAmountProcessor extends AmountProcessor {
 
@@ -9,9 +13,9 @@ public class BidderAmountProcessor extends AmountProcessor {
     }
 
     public void process(Auction auction) {
-        auction.bidderAmount = new BigDecimal(auction.getHighestPrice())
+        auction.setBidderAmount(new BigDecimal(auction.getHighestPrice())
                 .add(ShippingFeeFactory.getInstance(auction).calculate())
-                .add(LuxuryTaxFactory.getInstance(auction).calculate());
+                .add(LuxuryTaxFactory.getInstance(auction).calculate()));
         super.process(auction);
     }
 

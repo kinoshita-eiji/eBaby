@@ -1,4 +1,6 @@
-package application;
+package application.processor;
+
+import application.Auction;
 
 public abstract class OnCloseProcessor {
     OnCloseProcessor nextProcessor;

@@ -9,7 +9,7 @@ public class DownloadSoftwareShippingFee extends ShippingFee {
     }
 
     @Override
-    BigDecimal calculate() {
+    public BigDecimal calculate() {
         return new BigDecimal(0);
     }
 

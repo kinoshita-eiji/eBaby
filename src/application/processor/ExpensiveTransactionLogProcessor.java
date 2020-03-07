@@ -1,8 +1,10 @@
-package application;
+package application.processor;
 
 import com.tobeagile.training.ebaby.services.AuctionLogger;
 
-public class ExpensiveTransactionLogProcessor extends OnCloseProcessor {
+import application.Auction;
+
+public class ExpensiveTransactionLogProcessor extends OnCloseLogProcessor {
 
     public ExpensiveTransactionLogProcessor(OnCloseProcessor processor) {
         super(processor);
@@ -17,15 +19,8 @@ public class ExpensiveTransactionLogProcessor extends OnCloseProcessor {
     }
 
     public void process(Auction auction) {
-
-        String message = String.format("itemName:%s seller:%s bidder:%s bidPrice:%s",
-                auction.itemName,
-                auction.seller.userName,
-                auction.hasBid() ? auction.getHighestBidder().userName : "---",
-                auction.getHighestPrice());
-
         if (isLoggingTargetTransaction(auction)) {
-            AuctionLogger.getInstance().log(getFileName(), message);
+            AuctionLogger.getInstance().log(getFileName(), getLogMessage(auction));
         }
         super.process(auction);
     }

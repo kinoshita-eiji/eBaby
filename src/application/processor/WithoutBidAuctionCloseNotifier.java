@@ -1,6 +1,8 @@
-package application;
+package application.processor;
 
 import com.tobeagile.training.ebaby.services.PostOffice;
+
+import application.Auction;
 
 public class WithoutBidAuctionCloseNotifier extends AuctionCloseNotifier {
 
@@ -12,8 +14,8 @@ public class WithoutBidAuctionCloseNotifier extends AuctionCloseNotifier {
     public void process(Auction auction) {
         String message = String.format(
                 "Sorry, your auction for <%s> did not have any bidders",
-                auction.itemName);
+                auction.getItemName());
         PostOffice postOffice = PostOffice.getInstance();
-        postOffice.sendEMail(auction.seller.userEmail, message);
+        postOffice.sendEMail(auction.getSeller().getUserEmail(), message);
     }
 }

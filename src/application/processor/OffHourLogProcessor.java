@@ -1,9 +1,11 @@
-package application;
+package application.processor;
 
 import com.tobeagile.training.ebaby.services.AuctionLogger;
 import com.tobeagile.training.ebaby.services.Hours;
 
-public class OffHourLogProcessor extends OnCloseProcessor {
+import application.Auction;
+
+public class OffHourLogProcessor extends OnCloseLogProcessor {
 
     Hours offHours;
 
@@ -17,14 +19,8 @@ public class OffHourLogProcessor extends OnCloseProcessor {
     }
 
     public void process(Auction auction) {
-        String message = String.format("itemName:%s seller:%s bidder:%s bidPrice:%s",
-                auction.itemName,
-                auction.seller.userName,
-                auction.hasBid() ? auction.getHighestBidder().userName : "---",
-                auction.getHighestPrice());
-
         if (this.offHours.isOffHours()) {
-            AuctionLogger.getInstance().log(getFileName(), message);
+            AuctionLogger.getInstance().log(getFileName(), getLogMessage(auction));
         }
         super.process(auction);
     }

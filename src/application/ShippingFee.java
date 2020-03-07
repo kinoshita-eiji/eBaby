@@ -9,6 +9,5 @@ public abstract class ShippingFee {
         this.auction = auction;
     }
 
-    abstract BigDecimal calculate();
-
+    public abstract BigDecimal calculate();
 }

@@ -20,6 +20,8 @@ import application.exception.InvalidAuctionTimeException;
 import application.exception.InvalidBidException;
 import application.exception.NotAuthenticatedException;
 import application.exception.NotAuthorizedAsSellerException;
+import application.processor.OnCloseProcessor;
+import application.processor.OnCloseProcessorFactory;
 
 public class ActionTest {
 

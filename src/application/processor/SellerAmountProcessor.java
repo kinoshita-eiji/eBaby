@@ -1,6 +1,10 @@
-package application;
+package application.processor;
 
 import java.math.BigDecimal;
+
+import application.Auction;
+import application.PrefferredTransactionFee;
+import application.TransactionFee;
 
 public class SellerAmountProcessor extends AmountProcessor {
 
@@ -15,7 +19,7 @@ public class SellerAmountProcessor extends AmountProcessor {
         } else {
             fee = new TransactionFee(auction);
         }
-        auction.sellerAmount = new BigDecimal(auction.getHighestPrice()).subtract(fee.calculate());
+        auction.setSellerAmount(new BigDecimal(auction.getHighestPrice()).subtract(fee.calculate()));
         super.process(auction);
     }
 
