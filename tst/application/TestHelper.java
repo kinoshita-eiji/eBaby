@@ -43,9 +43,7 @@ public class TestHelper {
         Integer startingPrice = new Integer(1000);
         LocalDateTime startTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
         LocalDateTime endTime = LocalDateTime.of(2020, 3, 11, 9, 59, 59);
-        Auction createdAuction = loggedinUser.createAuction(
-                itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
-        return createdAuction;
+        return new Auction(loggedinUser, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
     }
 
     public static Auction getCheapAuction(User loggedinUser) {
@@ -55,11 +53,8 @@ public class TestHelper {
         Integer startingPrice = new Integer(10);
         LocalDateTime startTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
         LocalDateTime endTime = LocalDateTime.of(2020, 3, 11, 9, 59, 59);
-        Auction createdAuction = loggedinUser.createAuction(
-                itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
-        return createdAuction;
+        return new Auction(loggedinUser, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
     }
-
 
     public static Auction getDownloadSoftwareAuction(User loggedinUser) {
         String itemName = "item-name";
@@ -68,9 +63,7 @@ public class TestHelper {
         Integer startingPrice = new Integer(1000);
         LocalDateTime startTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
         LocalDateTime endTime = LocalDateTime.of(2020, 3, 11, 9, 59, 59);
-        Auction createdAuction = loggedinUser.createAuction(
-                itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
-        return createdAuction;
+        return new Auction(loggedinUser, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
     }
 
     public static Auction getCarAuction(User loggedinUser) {
@@ -80,9 +73,7 @@ public class TestHelper {
         Integer startingPrice = new Integer(1000);
         LocalDateTime startTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
         LocalDateTime endTime = LocalDateTime.of(2020, 3, 11, 9, 59, 59);
-        Auction createdAuction = loggedinUser.createAuction(
-                itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
-        return createdAuction;
+        return new Auction(loggedinUser, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
     }
 
     public static User getPreferredSeller() {

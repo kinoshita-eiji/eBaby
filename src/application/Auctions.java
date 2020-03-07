@@ -7,6 +7,8 @@ import java.util.ArrayList;
 
 import com.tobeagile.training.ebaby.services.Auctionable;
 
+import application.exception.InvalidAuctionTimeException;
+
 public class Auctions implements Auctionable {
 
     private ArrayList<Auction> list = new ArrayList<>();
@@ -29,7 +31,22 @@ public class Auctions implements Auctionable {
     }
 
     public void create(Auction auction) {
+
+        if (!auction.getStartTime().isAfter(now())) {
+            throw new InvalidAuctionTimeException("Start time must be in future");
+        }
+        if (!auction.getEndTime().isAfter(auction.getStartTime())) {
+            throw new InvalidAuctionTimeException("end time must be greater than start time");
+        }
+
         list.add(auction);
     }
 
+    public LocalDateTime now() {
+        return LocalDateTime.now();
+    }
+
+    public void setNow(LocalDateTime ldt) {
+        throw new RuntimeException("This method is only for mocking.");
+    }
 }

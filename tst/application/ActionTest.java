@@ -135,9 +135,9 @@ public class ActionTest {
         Integer startingPrice = new Integer(1000);
         LocalDateTime startTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
         LocalDateTime endTime = LocalDateTime.of(2020, 3, 11, 9, 59, 59);
+        Auction auction = new Auction(seller, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
 
-        Auction createdAuction = seller.createAuction(
-                itemName, itemDescription, itemCategory,startingPrice, startTime, endTime);
+        Auction createdAuction = seller.createAuction(auction);
 
         assertThat(createdAuction.getItemName(), is(itemName));
         assertThat(createdAuction.getSeller().getUserName(), is(seller.getUserName()));
@@ -154,8 +154,7 @@ public class ActionTest {
         User loggedinUser = users.login(bidder.getUserName(), bidder.getPassword());
 
         try {
-            loggedinUser.createAuction("item-name", "item-description", ItemCategory.OTHER, 1000, LocalDateTime.of(2020, 3, 6, 10, 0, 0),
-                    LocalDateTime.of(2020, 3, 8, 9, 59, 59));
+            loggedinUser.createAuction(TestHelper.getDefaultAuction(loggedinUser));
             Assert.fail("Not seller can't create auction");
         } catch (NotAuthorizedAsSellerException e) {
         }
@@ -168,8 +167,7 @@ public class ActionTest {
         users.promoteToSeller(user);
 
         try {
-            user.createAuction("item-name", "item-description", ItemCategory.OTHER, 1000, LocalDateTime.of(2020, 3, 4, 10, 0, 0),
-                    LocalDateTime.of(2020, 3, 5, 9, 59, 59));
+            user.createAuction(TestHelper.getDefaultAuction(user));
             Assert.fail("Seller can't create auction when not logged in");
         } catch (NotAuthenticatedException e) {
         }
@@ -183,8 +181,7 @@ public class ActionTest {
         User loggedinUser = users.login(user.getUserName(), user.getPassword());
 
         try {
-            loggedinUser.createAuction("item-name", "item-description", ItemCategory.OTHER, 1000, LocalDateTime.of(2020, 2, 4, 10, 0, 0),
-                    LocalDateTime.of(2020, 3, 5, 9, 59, 59));
+            loggedinUser.createAuction(TestHelper.getDefaultAuction(loggedinUser));
             Assert.fail("Action start time must be in future");
         } catch (InvalidAuctionTimeException e) {
         }
@@ -198,9 +195,18 @@ public class ActionTest {
         users.promoteToSeller(user);
         User loggedinUser = users.login(user.getUserName(), user.getPassword());
 
+        String itemName = "item-name";
+        String itemDescription = "説明文";
+        ItemCategory itemCategory = ItemCategory.OTHER;
+        Integer startingPrice = new Integer(1000);
+        LocalDateTime startTime = LocalDateTime.of(2020, 3, 11, 9, 59, 59);
+        LocalDateTime endTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
+        Auction auction =  new Auction(loggedinUser, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
+
+
         try {
-            loggedinUser.createAuction("item-name", "item-description", ItemCategory.OTHER, 1000, LocalDateTime.of(2020, 3, 10, 10, 0, 0),
-                    LocalDateTime.of(2020, 3, 9, 9, 59, 59));
+            Auctions auctions = new Auctions();
+            auctions.create(auction);
             Assert.fail("Action end time must be greater than start time");
         } catch (InvalidAuctionTimeException e) {
         }
@@ -214,10 +220,16 @@ public class ActionTest {
         users.promoteToSeller(user);
         User loggedinUser = users.login(user.getUserName(), user.getPassword());
 
+        String itemName = "item-name";
+        String itemDescription = "説明文";
+        ItemCategory itemCategory = ItemCategory.OTHER;
+        Integer startingPrice = new Integer(1000);
         LocalDateTime sameTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
+        Auction auction = new Auction(loggedinUser, itemName, itemDescription, itemCategory, startingPrice, sameTime, sameTime);
 
         try {
-            loggedinUser.createAuction("item-name", "item-description", ItemCategory.OTHER, 1000, sameTime, sameTime);
+            Auctions auctions = new Auctions();
+            auctions.create(auction);
             Assert.fail("Action end time must not be same as start time");
         } catch (InvalidAuctionTimeException e) {
         }
@@ -817,6 +829,18 @@ public class ActionTest {
 
         Auction handledAuction = auctions.getList().get(0);
         assertThat(handledAuction.getStatus(), is(AuctionStatus.CLOSED));
+    }
+
+    class MockedAuctions extends Auctions {
+        private LocalDateTime now;
+
+        public LocalDateTime now() {
+            return this.now;
+        }
+
+        public void setNow(LocalDateTime ldt) {
+            this.now = ldt;
+        }
     }
 
     class MockOffHours implements Hours {
