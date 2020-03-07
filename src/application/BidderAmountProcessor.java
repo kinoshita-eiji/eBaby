@@ -20,18 +20,12 @@ public class BidderAmountProcessor extends AmountProcessor {
     // TODO メソッドの実装が酷い・・・
     private BigDecimal calculateShippingFee(Auction auction) {
         if (auction.itemCategory == ItemCategory.DOWNLOAD_SOFTWARE) {
-            return new BigDecimal(0);
-        } else if (auction.itemCategory == ItemCategory.CAR) {
-            if (auction.seller.isPreferredSeller) {
-                return new BigDecimal(500);
-            } else {
-                return new BigDecimal(1000);
-            }
-        } else if (auction.seller.isPreferredSeller && auction.highestPrice >= 50) {
-            return new BigDecimal(0);
-        } else {
-            return new BigDecimal(10);
+            return new DownloadSoftwareShippingFee(auction).calculate();
         }
+        if (auction.itemCategory == ItemCategory.CAR) {
+            return new CarShippingFee(auction).calculate();
+        }
+        return new OtherShippingFee(auction).calculate();
     }
 
     private BigDecimal calculateLuxuryTax(Auction auction) {
