@@ -3,6 +3,8 @@ package application;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import application.exception.InvalidAuctionTimeException;
+
 public class Auction {
     User seller;
     String itemName;
@@ -19,6 +21,14 @@ public class Auction {
 
     public Auction(User seller, String itemName, String itemDescription, ItemCategory itemCategory, Integer startingPrice, LocalDateTime startTime,
             LocalDateTime endTime) {
+
+        if (!startTime.isAfter(LocalDateTime.now())) {
+            throw new InvalidAuctionTimeException("Start time must be in future");
+        }
+        if (!endTime.isAfter(startTime)) {
+            throw new InvalidAuctionTimeException("end time must be greater than start time");
+        }
+
         this.seller = seller;
         this.itemName = itemName;
         this.itemDescription = itemDescription;

@@ -63,8 +63,7 @@ public class Users {
 
     public void promoteToSeller(User user) {
         User foundUser = findByUserName(user.userName);
-
-        foundUser.isSeller = true;
+        foundUser.role = new Seller();
         registeredUser.put(foundUser.userName, foundUser);
     }
 
