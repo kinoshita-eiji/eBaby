@@ -3,6 +3,7 @@ package application;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -20,6 +21,9 @@ import application.exception.InvalidAuctionTimeException;
 import application.exception.InvalidBidException;
 import application.exception.NotAuthenticatedException;
 import application.exception.NotAuthorizedAsSellerException;
+import application.processor.CarTransactionLogProcessor;
+import application.processor.ExpensiveTransactionLogProcessor;
+import application.processor.OffHourLogProcessor;
 import application.processor.OnCloseProcessor;
 import application.processor.OnCloseProcessorFactory;
 
@@ -50,7 +54,7 @@ public class ActionTest {
         User user = TestHelper.getDefaultSeller();
         try {
             users.register(user);
-            Assert.fail("同じユーザ名で登録できてはいけない");
+            Assert.fail("Users can't register same userName");
         } catch (DuplicatedUserException e) {
         }
     }
@@ -130,7 +134,7 @@ public class ActionTest {
         seller = users.login(seller.getUserName(), seller.getPassword());
 
         String itemName = "item-name";
-        String itemDescription = "説明文";
+        String itemDescription = "item-description";
         ItemCategory itemCategory = ItemCategory.OTHER;
         Integer startingPrice = new Integer(1000);
         LocalDateTime startTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
@@ -180,8 +184,18 @@ public class ActionTest {
         users.promoteToSeller(user);
         User loggedinUser = users.login(user.getUserName(), user.getPassword());
 
+        String itemName = "item-name";
+        String itemDescription = "item-description";
+        ItemCategory itemCategory = ItemCategory.OTHER;
+        Integer startingPrice = new Integer(1000);
+        LocalDateTime startTime = LocalDateTime.of(2020, 3, 9, 9, 59, 59);
+        LocalDateTime endTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
+        Auction auction =  new Auction(loggedinUser, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
+
         try {
-            loggedinUser.createAuction(TestHelper.getDefaultAuction(loggedinUser));
+            Auctions auctions = new MockedAuctions();
+            auctions.setNow(LocalDateTime.of(2020, 3, 10, 9, 59, 59));
+            auctions.create(auction);
             Assert.fail("Action start time must be in future");
         } catch (InvalidAuctionTimeException e) {
         }
@@ -196,13 +210,12 @@ public class ActionTest {
         User loggedinUser = users.login(user.getUserName(), user.getPassword());
 
         String itemName = "item-name";
-        String itemDescription = "説明文";
+        String itemDescription = "item-description";
         ItemCategory itemCategory = ItemCategory.OTHER;
         Integer startingPrice = new Integer(1000);
         LocalDateTime startTime = LocalDateTime.of(2020, 3, 11, 9, 59, 59);
         LocalDateTime endTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
         Auction auction =  new Auction(loggedinUser, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
-
 
         try {
             Auctions auctions = new Auctions();
@@ -221,7 +234,7 @@ public class ActionTest {
         User loggedinUser = users.login(user.getUserName(), user.getPassword());
 
         String itemName = "item-name";
-        String itemDescription = "説明文";
+        String itemDescription = "item-description";
         ItemCategory itemCategory = ItemCategory.OTHER;
         Integer startingPrice = new Integer(1000);
         LocalDateTime sameTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
@@ -540,9 +553,8 @@ public class ActionTest {
         bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
-        AuctionLogger logger = AuctionLogger.getInstance();
         String fileName = "C:\\workspace\\eBaby\\log\\car-transaction.log";
-        logger.clearLog(fileName);
+        cleanUpLogfile(fileName);
 
         auction.onClose();
 
@@ -552,6 +564,7 @@ public class ActionTest {
                 "e-kinoshita",
                 bidPrice);
 
+        AuctionLogger logger = AuctionLogger.getInstance();
         assertThat(logger.findMessage(fileName, message), is(true));
     }
 
@@ -568,19 +581,13 @@ public class ActionTest {
         bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
-        AuctionLogger logger = AuctionLogger.getInstance();
-        String fileName = "C:\\workspace\\eBaby\\log\\car-transaction.log";
-        logger.clearLog(fileName);
+        CarTransactionLogProcessor processor = new CarTransactionLogProcessor(null);
+        String fileName = processor.getFileName();
+        cleanUpLogfile(fileName);
 
         auction.onClose();
 
-        String message = String.format("itemName:%s seller:%s bidder:%s bidPrice:%s",
-                "item-name",
-                "k-clark",
-                "e-kinoshita",
-                bidPrice);
-
-        assertThat(logger.findMessage(fileName, message), is(false));
+        assertThat(new File(fileName).exists(), is(false));
     }
 
     @Test
@@ -598,7 +605,7 @@ public class ActionTest {
 
         AuctionLogger logger = AuctionLogger.getInstance();
         String fileName = "C:\\workspace\\eBaby\\log\\expensive-transaction.log";
-        logger.clearLog(fileName);
+        cleanUpLogfile(fileName);
 
         auction.onClose();
 
@@ -624,19 +631,13 @@ public class ActionTest {
         bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
-        AuctionLogger logger = AuctionLogger.getInstance();
-        String fileName = "C:\\workspace\\eBaby\\log\\expensive-transaction.log";
-        logger.clearLog(fileName);
+        ExpensiveTransactionLogProcessor processor = new ExpensiveTransactionLogProcessor(null);
+        String fileName = processor.getFileName();
+        cleanUpLogfile(fileName);
 
         auction.onClose();
 
-        String message = String.format("itemName:%s seller:%s bidder:%s bidPrice:%s",
-                "item-name-car",
-                "k-clark",
-                "e-kinoshita",
-                bidPrice);
-
-        assertThat(logger.findMessage(fileName, message), is(false));
+        assertThat(new File(fileName).exists(), is(false));
     }
 
     @Test
@@ -754,20 +755,13 @@ public class ActionTest {
         bidder = users.login(bidder.getUserName(), bidder.getPassword());
         bidder.offerBid(auction, bidPrice);
 
-        AuctionLogger logger = AuctionLogger.getInstance();
-        String fileName = "C:\\workspace\\eBaby\\log\\offhour-transaction.log";
-        logger.clearLog(fileName);
+        String fileName = new OffHourLogProcessor(null, null).getFileName();
+        cleanUpLogfile(fileName);
 
         OnCloseProcessor processor = OnCloseProcessorFactory.getProcessor(auction, new MockOffHours(false));
         processor.process(auction);
 
-        String message = String.format("itemName:%s seller:%s bidder:%s bidPrice:%s",
-                "item-name",
-                "k-clark",
-                "e-kinoshita",
-                bidPrice);
-
-        assertThat(logger.findMessage(fileName, message), is(false));
+        assertThat(new File(fileName).exists(), is(false));
 
     }
 
@@ -829,6 +823,13 @@ public class ActionTest {
 
         Auction handledAuction = auctions.getList().get(0);
         assertThat(handledAuction.getStatus(), is(AuctionStatus.CLOSED));
+    }
+
+    private void cleanUpLogfile(String fileName) {
+        if (new File(fileName).exists()) {
+            AuctionLogger logger = AuctionLogger.getInstance();
+            logger.clearLog(fileName);
+        }
     }
 
     class MockedAuctions extends Auctions {
