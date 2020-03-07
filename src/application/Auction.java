@@ -3,7 +3,9 @@ package application;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import application.exception.AuctionIsNotStartedException;
 import application.exception.InvalidAuctionTimeException;
+import application.exception.InvalidBidException;
 
 public class Auction {
     User seller;
@@ -14,10 +16,11 @@ public class Auction {
     LocalDateTime startTime;
     LocalDateTime endTime;
     AuctionStatus status;
-    Integer highestPrice;
-    User highestBidder;
     BigDecimal sellerAmount;
     BigDecimal bidderAmount;
+
+    Integer highestPrice;
+    User highestBidder;
 
     public Auction(User seller, String itemName, String itemDescription, ItemCategory itemCategory, Integer startingPrice, LocalDateTime startTime,
             LocalDateTime endTime) {
@@ -48,6 +51,18 @@ public class Auction {
         this.status = AuctionStatus.CLOSED;
         OnCloseProcessor processor = OnCloseProcessorFactory.getProcessor(this);
         processor.process(this);
+
+    }
+
+    public void acceptBid(Bid bid) {
+        if (this.status != AuctionStatus.STARTED) {
+            throw new AuctionIsNotStartedException("Auction is not started");
+        }
+        if (bid.price <= this.highestPrice) {
+            throw new InvalidBidException("Bid price must be higher than current price");
+        }
+        this.highestBidder = bid.bidder;
+        this.highestPrice = bid.price;
 
     }
 

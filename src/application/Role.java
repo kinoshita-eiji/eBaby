@@ -13,8 +13,8 @@ public class Role {
         throw new NotAuthorizedAsSellerException("You are not seller.");
     }
 
-    public void bid(Auction auction, Integer price) {
-        throw new RuntimeException("You are not bidder.");
+    public void offerBid(Auction auction, Bid bid) {
+        throw new RuntimeException("You cant' bid");
     }
 
     public boolean isSeller() {

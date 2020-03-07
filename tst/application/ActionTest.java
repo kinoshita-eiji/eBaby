@@ -266,7 +266,7 @@ public class ActionTest {
         auction.onStart();
 
         Integer bidPrice = new Integer(2000);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
         assertThat(auction.highestBidder, is(bidder));
         assertThat(auction.highestPrice, is(bidPrice));
     }
@@ -284,7 +284,7 @@ public class ActionTest {
 
         Integer bidPrice = new Integer(2000);
         try {
-            bidder.bid(auction, bidPrice);
+            bidder.offerBid(auction, bidPrice);
             Assert.fail("Unauthenticated bidder can't bid started auction");
         } catch (NotAuthenticatedException e) {
         }
@@ -303,7 +303,7 @@ public class ActionTest {
 
         Integer bidPrice = new Integer(2000);
         try {
-            bidder.bid(auction, bidPrice);
+            bidder.offerBid(auction, bidPrice);
             Assert.fail("Unstarted auction can't be bid");
         } catch (AuctionIsNotStartedException e) {
         }
@@ -323,7 +323,7 @@ public class ActionTest {
 
         try {
             Integer lowerPrice = new Integer(999);
-            bidder.bid(auction, lowerPrice);
+            bidder.offerBid(auction, lowerPrice);
             Assert.fail("Bidder can't bid lower price than starting price.");
         } catch (InvalidBidException e) {
         }
@@ -342,11 +342,11 @@ public class ActionTest {
         auction.onStart();
 
         Integer bidPrice = new Integer(2000);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         try {
             Integer lowerPrice = new Integer(1999);
-            bidder.bid(auction, lowerPrice);
+            bidder.offerBid(auction, lowerPrice);
             Assert.fail("Bidder can't bid lower price.");
         } catch (InvalidBidException e) {
         }
@@ -363,7 +363,7 @@ public class ActionTest {
 
         try {
             Integer lowerPrice = new Integer(2000);
-            seller.bid(auction, lowerPrice);
+            seller.offerBid(auction, lowerPrice);
             Assert.fail("Bidder can't bid own auction.");
         } catch (InvalidBidException e) {
         }
@@ -395,7 +395,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         PostOffice postOffice = PostOffice.getInstance();
         postOffice.clear();
@@ -417,7 +417,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         PostOffice postOffice = PostOffice.getInstance();
         postOffice.clear();
@@ -439,7 +439,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(1999);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
         assertThat(auction.sellerAmount, is(new BigDecimal(1960)));
@@ -456,7 +456,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
         assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice)));
@@ -473,7 +473,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
         assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice + 10)));
@@ -490,7 +490,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(49999);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
         assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice + 1000)));
@@ -507,7 +507,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(50001);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
         assertThat(auction.bidderAmount, is(new BigDecimal(bidPrice + 1000 + 2000)));
@@ -524,7 +524,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(50001);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         AuctionLogger logger = AuctionLogger.getInstance();
         String fileName = "C:\\workspace\\eBaby\\log\\car-transaction.log";
@@ -552,7 +552,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(50001);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         AuctionLogger logger = AuctionLogger.getInstance();
         String fileName = "C:\\workspace\\eBaby\\log\\car-transaction.log";
@@ -580,7 +580,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(10000);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         AuctionLogger logger = AuctionLogger.getInstance();
         String fileName = "C:\\workspace\\eBaby\\log\\expensive-transaction.log";
@@ -608,7 +608,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(9999);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         AuctionLogger logger = AuctionLogger.getInstance();
         String fileName = "C:\\workspace\\eBaby\\log\\expensive-transaction.log";
@@ -636,7 +636,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(50);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
 
@@ -654,7 +654,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(49);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
 
@@ -672,7 +672,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
 
@@ -690,7 +690,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         auction.onClose();
 
@@ -708,7 +708,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         AuctionLogger logger = AuctionLogger.getInstance();
         String fileName = "C:\\workspace\\eBaby\\log\\offhour-transaction.log";
@@ -738,7 +738,7 @@ public class ActionTest {
         User bidder = TestHelper.getDefaultBidder();
         Integer bidPrice = new Integer(2000);
         bidder = users.login(bidder.userName, bidder.password);
-        bidder.bid(auction, bidPrice);
+        bidder.offerBid(auction, bidPrice);
 
         AuctionLogger logger = AuctionLogger.getInstance();
         String fileName = "C:\\workspace\\eBaby\\log\\offhour-transaction.log";
