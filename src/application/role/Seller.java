@@ -1,18 +1,14 @@
 package application.role;
 
-import java.time.LocalDateTime;
-
 import application.Auction;
-import application.ItemCategory;
-import application.User;
 
 public class Seller extends Role {
 
     public Seller() {
     }
 
-    public Auction createAuction(User seller, String itemName, String itemDescription, ItemCategory itemCategory, Integer startingPrice, LocalDateTime startTime, LocalDateTime endTime) {
-        return new Auction(seller, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
+    public Auction createAuction(Auction auction) {
+        return auction;
     }
 
     public boolean isSeller() {

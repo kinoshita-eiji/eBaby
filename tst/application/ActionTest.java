@@ -141,8 +141,8 @@ public class ActionTest {
 
         assertThat(createdAuction.getItemName(), is(itemName));
         assertThat(createdAuction.getSeller().getUserName(), is(seller.getUserName()));
-        assertThat(createdAuction.itemDescription, is(itemDescription));
-        assertThat(createdAuction.startingPrice, is(startingPrice));
+        assertThat(createdAuction.getItemDescription(), is(itemDescription));
+        assertThat(createdAuction.getStartingPrice(), is(startingPrice));
         assertThat(createdAuction.getStartTime(), is(startTime));
         assertThat(createdAuction.getEndTime(), is(endTime));
     }
@@ -231,11 +231,11 @@ public class ActionTest {
 
         Auction createdAuction = TestHelper.getDefaultAuction(seller);
 
-        assertThat(createdAuction.status, is(AuctionStatus.UNSTARTED));
+        assertThat(createdAuction.getStatus(), is(AuctionStatus.UNSTARTED));
 
         createdAuction.onStart();
 
-        assertThat(createdAuction.status, is(AuctionStatus.STARTED));
+        assertThat(createdAuction.getStatus(), is(AuctionStatus.STARTED));
 
     }
 
@@ -247,12 +247,12 @@ public class ActionTest {
 
         Auction createdAuction = TestHelper.getDefaultAuction(seller);
 
-        assertThat(createdAuction.status, is(AuctionStatus.UNSTARTED));
+        assertThat(createdAuction.getStatus(), is(AuctionStatus.UNSTARTED));
 
         createdAuction.onStart();
         createdAuction.onClose();
 
-        assertThat(createdAuction.status, is(AuctionStatus.CLOSED));
+        assertThat(createdAuction.getStatus(), is(AuctionStatus.CLOSED));
     }
 
     @Test
@@ -776,7 +776,7 @@ public class ActionTest {
         timer.timerTick(now);
 
         Auction handledAuction = auctions.getList().get(0);
-        assertThat(handledAuction.status, is(AuctionStatus.UNSTARTED));
+        assertThat(handledAuction.getStatus(), is(AuctionStatus.UNSTARTED));
     }
 
     @Test
@@ -796,7 +796,7 @@ public class ActionTest {
         timer.timerTick(now);
 
         Auction handledAuction = auctions.getList().get(0);
-        assertThat(handledAuction.status, is(AuctionStatus.STARTED));
+        assertThat(handledAuction.getStatus(), is(AuctionStatus.STARTED));
     }
 
     @Test
@@ -816,7 +816,7 @@ public class ActionTest {
         timer.timerTick(now);
 
         Auction handledAuction = auctions.getList().get(0);
-        assertThat(handledAuction.status, is(AuctionStatus.CLOSED));
+        assertThat(handledAuction.getStatus(), is(AuctionStatus.CLOSED));
     }
 
     class MockOffHours implements Hours {

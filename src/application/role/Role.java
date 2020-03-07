@@ -1,11 +1,7 @@
 package application.role;
 
-import java.time.LocalDateTime;
-
 import application.Auction;
 import application.Bid;
-import application.ItemCategory;
-import application.User;
 import application.exception.NotAuthorizedAsSellerException;
 
 public class Role {
@@ -13,7 +9,7 @@ public class Role {
     public Role() {
     }
 
-    public Auction createAuction(User seller, String itemName, String itemDescription, ItemCategory itemCategory, Integer startingPrice, LocalDateTime startTime, LocalDateTime endTime) {
+    public Auction createAuction(Auction auction) {
         throw new NotAuthorizedAsSellerException("You are not seller.");
     }
 

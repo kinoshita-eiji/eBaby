@@ -1,7 +1,5 @@
 package application;
 
-import java.time.LocalDateTime;
-
 import application.exception.NotAuthenticatedException;
 import application.role.Bidder;
 import application.role.Role;
@@ -80,11 +78,12 @@ public class User {
         this.role = new Bidder();
     }
 
-    public Auction createAuction(String itemName, String itemDescription, ItemCategory itemCategory, Integer startingPrice, LocalDateTime startTime, LocalDateTime endTime) {
+    public Auction createAuction(Auction auction) {
         if (!this.isLoggedIn) {
             throw new NotAuthenticatedException("You are not logged in");
         }
-        return role.createAuction(this, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
+        auction.setSeller(this);
+        return role.createAuction(auction);
     }
 
     public void offerBid(Auction auction, Integer price) {
