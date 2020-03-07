@@ -1,6 +1,7 @@
 package application;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public class TestHelper {
 
@@ -92,5 +93,10 @@ public class TestHelper {
         String password = "PASSWORD";
         return new User(firstName, lastName, userEmail, userName, password);
     }
+
+    public static long ldtToEpochMilliSecond(LocalDateTime ldt) {
+        return ldt.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000;
+    }
+
 
 }

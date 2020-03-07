@@ -5,8 +5,6 @@ import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,8 +14,6 @@ import com.tobeagile.training.ebaby.services.Hours;
 import com.tobeagile.training.ebaby.services.PostOffice;
 
 public class ActionTest {
-
-
 
     @Test
     public void ユーザが登録できる() {
@@ -763,7 +759,11 @@ public class ActionTest {
         Auctions auctions = new Auctions();
         auctions.create(auction);
 
-        auctions.handleAuctionEvents((new Date()).getTime());
+        BetterAuctionTimer timer = new BetterAuctionTimer();
+        timer.checkAuction(auctions);
+
+        long now = TestHelper.ldtToEpochMilliSecond(auction.startTime) - 1000;
+        timer.timerTick(now);
 
         Auction handledAuction = auctions.getList().get(0);
         assertThat(handledAuction.status, is(AuctionStatus.UNSTARTED));
@@ -779,9 +779,11 @@ public class ActionTest {
         Auctions auctions = new Auctions();
         auctions.create(auction);
 
-        long unixtime = auction.startTime.atZone(ZoneId.systemDefault()).toEpochSecond();
+        BetterAuctionTimer timer = new BetterAuctionTimer();
+        timer.checkAuction(auctions);
 
-        auctions.handleAuctionEvents((unixtime + 10) * 1000);
+        long now = TestHelper.ldtToEpochMilliSecond(auction.startTime) + 1000;
+        timer.timerTick(now);
 
         Auction handledAuction = auctions.getList().get(0);
         assertThat(handledAuction.status, is(AuctionStatus.STARTED));
@@ -797,9 +799,11 @@ public class ActionTest {
         Auctions auctions = new Auctions();
         auctions.create(auction);
 
-        long unixtime = auction.endTime.atZone(ZoneId.systemDefault()).toEpochSecond();
+        BetterAuctionTimer timer = new BetterAuctionTimer();
+        timer.checkAuction(auctions);
 
-        auctions.handleAuctionEvents((unixtime + 10) * 1000);
+        long now = TestHelper.ldtToEpochMilliSecond(auction.endTime) + 1000;
+        timer.timerTick(now);
 
         Auction handledAuction = auctions.getList().get(0);
         assertThat(handledAuction.status, is(AuctionStatus.CLOSED));

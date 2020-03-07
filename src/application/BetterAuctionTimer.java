@@ -19,15 +19,19 @@ public class BetterAuctionTimer {
 
     public void start() {
         timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() { public void run() {timerTick(); } }, 100, 100);
+        timer.scheduleAtFixedRate(new TimerTask() { public void run() { timerTick(); } }, 100, 100);
     }
 
     public void stop() {
         timer.cancel();
     }
 
-    private void timerTick() {
-        long now = (new Date()).getTime();
+    public void timerTick() {
+        timerTick((new Date()).getTime());
+    }
+
+    public void timerTick(long now) {
         auctions.handleAuctionEvents(now);
     }
+
 }
