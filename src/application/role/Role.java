@@ -18,11 +18,11 @@ public class Role {
     }
 
     public boolean isSeller() {
-        throw new NotAuthorizedAsSellerException("You are not seller.");
+        return false;
     }
 
     public boolean isPreferredSeller() {
-        throw new NotAuthorizedAsSellerException("You are not preferred seller.");
+        return false;
     }
 
 }

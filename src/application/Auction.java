@@ -33,48 +33,24 @@ public class Auction {
         return itemName;
     }
 
-    public void setItemName(String itemName) {
-        this.itemName = itemName;
-    }
-
     public String getItemDescription() {
         return itemDescription;
-    }
-
-    public void setItemDescription(String itemDescription) {
-        this.itemDescription = itemDescription;
     }
 
     public ItemCategory getItemCategory() {
         return itemCategory;
     }
 
-    public void setItemCategory(ItemCategory itemCategory) {
-        this.itemCategory = itemCategory;
-    }
-
     public Integer getStartingPrice() {
         return startingPrice;
-    }
-
-    public void setStartingPrice(Integer startingPrice) {
-        this.startingPrice = startingPrice;
     }
 
     public LocalDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
     public LocalDateTime getEndTime() {
         return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
     }
 
     public AuctionStatus getStatus() {
@@ -142,16 +118,16 @@ public class Auction {
         if (bid.price <= getHighestPrice()) {
             throw new InvalidBidException("Bid price must be higher than current price");
         }
-        this.highestBid = bid;
+        this.setHighestBid(bid);
     }
 
     public User getHighestBidder() {
-        return this.highestBid.bidder;
+        return getHighestBid().bidder;
     }
 
 
     public Integer getHighestPrice() {
-        return this.highestBid.price;
+        return getHighestBid().price;
     }
 
     public boolean hasBid() {

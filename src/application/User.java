@@ -17,40 +17,20 @@ public class User {
         return firstName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
     public String getLastName() {
         return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
     }
 
     public String getUserEmail() {
         return userEmail;
     }
 
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
-    }
-
     public String getUserName() {
         return userName;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
     public String getPassword() {
         return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public boolean isLoggedIn() {
@@ -83,7 +63,7 @@ public class User {
             throw new NotAuthenticatedException("You are not logged in");
         }
         auction.setSeller(this);
-        return role.createAuction(auction);
+        return getRole().createAuction(auction);
     }
 
     public void offerBid(Auction auction, Integer price) {
@@ -92,16 +72,16 @@ public class User {
         }
 
         Bid bid = new Bid(this, price);
-        role.offerBid(auction, bid);
+        getRole().offerBid(auction, bid);
 
     }
 
     public boolean isSeller() {
-        return role.isSeller();
+        return getRole().isSeller();
     }
 
     public boolean isPreferredSeller() {
-        return role.isPreferredSeller();
+        return getRole().isPreferredSeller();
     }
 
 }

@@ -49,10 +49,6 @@ public class Users {
     public User logout(String userName) {
          User user = findByUserName(userName);
 
-         if (user == null) {
-             throw new NotAuthenticatedException("You can't logout with inexistent user");
-         }
-
          if (!user.isLoggedIn()) {
              throw new NotAuthenticatedException("You are not Authenticated");
          }

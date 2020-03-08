@@ -456,7 +456,7 @@ public class AuctionTest {
     }
 
     @Test
-    public void calculateSallerAmount() {
+    public void CalculateSallerAmount() {
         Users users = TestHelper.setUpUsers();
         User seller = TestHelper.getDefaultSeller();
         seller = users.login(seller.getUserName(), seller.getPassword());

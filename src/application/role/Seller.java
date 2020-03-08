@@ -15,7 +15,4 @@ public class Seller extends Role {
         return true;
     }
 
-    public boolean isPreferredSeller() {
-        return false;
-    }
 }
