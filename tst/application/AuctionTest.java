@@ -27,7 +27,7 @@ import application.processor.OffHourLogProcessor;
 import application.processor.OnCloseProcessor;
 import application.processor.OnCloseProcessorFactory;
 
-public class ActionTest {
+public class AuctionTest {
 
     @Test
     public void UsersCanRegisterUser() {

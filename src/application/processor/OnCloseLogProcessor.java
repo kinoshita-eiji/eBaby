@@ -1,5 +1,7 @@
 package application.processor;
 
+import com.tobeagile.training.ebaby.services.AuctionLogger;
+
 import application.Auction;
 
 public class OnCloseLogProcessor extends OnCloseProcessor {
@@ -15,4 +17,20 @@ public class OnCloseLogProcessor extends OnCloseProcessor {
                 auction.hasBid() ? auction.getHighestBidder().getUserName() : "---",
                 auction.getHighestPrice());
     }
+
+    public void process(Auction auction) {
+        if (isLoggingTarget(auction)) {
+            AuctionLogger.getInstance().log(getFileName(), getLogMessage(auction));
+        }
+        super.process(auction);
+    }
+
+    protected String getFileName() {
+        throw new RuntimeException("getFileName must be override.");
+    }
+
+    protected boolean isLoggingTarget(Auction auction) {
+        return true;
+    }
+
 }
