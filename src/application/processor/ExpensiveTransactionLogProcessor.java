@@ -12,7 +12,7 @@ public class ExpensiveTransactionLogProcessor extends OnCloseLogProcessor {
         return "C:\\workspace\\eBaby\\log\\expensive-transaction.log";
     }
 
-    public boolean isLoggingTarget(Auction auction) {
+    public boolean isTargetTransaction(Auction auction) {
         return 10000 <= auction.getHighestPrice();
     }
 

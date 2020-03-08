@@ -13,7 +13,7 @@ public class CarTransactionLogProcessor extends OnCloseLogProcessor {
         return "C:\\workspace\\eBaby\\log\\car-transaction.log";
     }
 
-    public boolean isLoggingTarget(Auction auction) {
+    public boolean isTargetTransaction(Auction auction) {
         return auction.getItemCategory() == ItemCategory.CAR;
     }
 

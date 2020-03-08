@@ -19,7 +19,7 @@ public class OnCloseLogProcessor extends OnCloseProcessor {
     }
 
     public void process(Auction auction) {
-        if (isLoggingTarget(auction)) {
+        if (isTargetTransaction(auction)) {
             AuctionLogger.getInstance().log(getFileName(), getLogMessage(auction));
         }
         super.process(auction);
@@ -29,7 +29,7 @@ public class OnCloseLogProcessor extends OnCloseProcessor {
         throw new RuntimeException("getFileName must be override.");
     }
 
-    protected boolean isLoggingTarget(Auction auction) {
+    protected boolean isTargetTransaction(Auction auction) {
         return true;
     }
 

@@ -1,9 +1,6 @@
 package application.processor;
 
-import com.tobeagile.training.ebaby.services.PostOffice;
-
 import application.Auction;
-import application.User;
 
 public class AuctionCloseSellerNotifier extends AuctionCloseNotifier {
 
@@ -11,31 +8,27 @@ public class AuctionCloseSellerNotifier extends AuctionCloseNotifier {
         super(processor);
     }
 
-    @Override
-    public void process(Auction auction) {
+    public String getSendTo(Auction auction) {
+        return auction.getSeller().getUserEmail();
+    }
 
-        String itemName = auction.getItemName();
-        User highestBidder = auction.getHighestBidder();
-        User seller = auction.getSeller();
-        Integer highestPrice = auction.getHighestPrice();
-
-        PostOffice postOffice = PostOffice.getInstance();
-
+    public String getMessage(Auction auction) {
         if (auction.hasBid()) {
-            String messageForSeller = String.format(
+            return String.format(
                     "Your <%s> auction sold to bidder <%s> for <%s>.",
-                    itemName,
-                    highestBidder.getUserEmail(),
-                    highestPrice);
-            postOffice.sendEMail(seller.getUserEmail(), messageForSeller);
+                    auction.getItemName(),
+                    auction.getHighestBidder().getUserEmail(),
+                    auction.getHighestPrice());
+
         } else {
-            String message = String.format(
+            return String.format(
                     "Sorry, your auction for <%s> did not have any bidders",
                     auction.getItemName());
-            postOffice.sendEMail(auction.getSeller().getUserEmail(), message);
         }
+    }
 
-        super.process(auction);
+    public boolean isTargetTransaction(Auction auction) {
+        return true;
     }
 
 }

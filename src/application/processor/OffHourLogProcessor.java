@@ -17,7 +17,7 @@ public class OffHourLogProcessor extends OnCloseLogProcessor {
         return "C:\\workspace\\eBaby\\log\\offhour-transaction.log";
     }
 
-    public boolean isLoggingTarget(Auction auction) {
+    public boolean isTargetTransaction(Auction auction) {
         return this.offHours.isOffHours();
     }
 
