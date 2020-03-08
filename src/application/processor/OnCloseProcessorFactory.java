@@ -11,24 +11,14 @@ public class OnCloseProcessorFactory {
     }
 
     public static OnCloseProcessor getProcessor(Auction auction, Hours offHours) {
-        if (!auction.hasBid()) {
-            return new SellerAmountProcessor(
-                    new BidderAmountProcessor(
-                            new CarTransactionLogProcessor(
-                                    new ExpensiveTransactionLogProcessor(
-                                            new OffHourLogProcessor(
-                                                    new WithoutBidAuctionCloseNotifier(),
-                                                    offHours)))));
-
-        } else {
-            return new SellerAmountProcessor(
-                    new BidderAmountProcessor(
-                            new CarTransactionLogProcessor(
-                                    new ExpensiveTransactionLogProcessor(
-                                            new OffHourLogProcessor(
-                                                    new WithBidAuctionCloseNotifier(),
-                                                    offHours)))));
-        }
+        return new SellerAmountProcessor(
+                new BidderAmountProcessor(
+                        new CarTransactionLogProcessor(
+                                new ExpensiveTransactionLogProcessor(
+                                        new OffHourLogProcessor(
+                                                new AuctionCloseSellerNotifier(
+                                                        new AuctionCloseBidderNotifier(null)),
+                                                offHours)))));
     }
 
     public static OnCloseProcessor getProcessor(Auction auction) {
