@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>Auctions.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">AuctionTest (2020/03/09 21:36:44)</a> &gt; <a href="../../index.html" class="el_group">eBaby</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">application</a> &gt; <span class="el_source">Auctions.java</span></div><h1>Auctions.java</h1><pre class="source lang-java linenums">package application;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+
+import com.tobeagile.training.ebaby.services.Auctionable;
+
+import application.exception.InvalidAuctionTimeException;
+
+<span class="fc" id="L12">public class Auctions implements Auctionable {</span>
+
+<span class="fc" id="L14">    private ArrayList&lt;Auction&gt; list = new ArrayList&lt;&gt;();</span>
+
+    @Override
+    public void handleAuctionEvents(long now) {
+<span class="fc" id="L18">        LocalDateTime ldtNow = LocalDateTime.ofInstant(Instant.ofEpochMilli(now), ZoneId.systemDefault());</span>
+<span class="fc bfc" id="L19" title="All 2 branches covered.">        for (Auction auction : getList()) {</span>
+<span class="fc bfc" id="L20" title="All 2 branches covered.">            if (ldtNow.isAfter(auction.getStartTime())) {</span>
+<span class="fc" id="L21">                auction.setStatus(AuctionStatus.STARTED);</span>
+            }
+<span class="fc bfc" id="L23" title="All 2 branches covered.">            if (ldtNow.isAfter(auction.getEndTime())) {</span>
+<span class="fc" id="L24">                auction.setStatus(AuctionStatus.CLOSED);</span>
+            }
+        }
+<span class="fc" id="L27">    }</span>
+
+    public ArrayList&lt;Auction&gt; getList() {
+<span class="fc" id="L30">        return list;</span>
+    }
+
+    public void create(Auction auction) {
+
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (!auction.getStartTime().isAfter(now())) {</span>
+<span class="fc" id="L36">            throw new InvalidAuctionTimeException(&quot;Start time must be in future&quot;);</span>
+        }
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        if (!auction.getEndTime().isAfter(auction.getStartTime())) {</span>
+<span class="fc" id="L39">            throw new InvalidAuctionTimeException(&quot;end time must be greater than start time&quot;);</span>
+        }
+
+<span class="fc" id="L42">        list.add(auction);</span>
+<span class="fc" id="L43">    }</span>
+
+    public LocalDateTime now() {
+<span class="fc" id="L46">        return LocalDateTime.now();</span>
+    }
+
+    public void setNow(LocalDateTime ldt) {
+<span class="nc" id="L50">        throw new RuntimeException(&quot;This method is only for mocking.&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>AuctionTest (2020/03/09 21:36:44)</div></body></html>

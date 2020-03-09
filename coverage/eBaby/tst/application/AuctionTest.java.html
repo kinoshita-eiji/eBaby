@@ -1,0 +1,859 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>AuctionTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">AuctionTest (2020/03/09 21:36:44)</a> &gt; <a href="../../index.html" class="el_group">eBaby</a> &gt; <a href="../index.html" class="el_bundle">tst</a> &gt; <a href="index.source.html" class="el_package">application</a> &gt; <span class="el_source">AuctionTest.java</span></div><h1>AuctionTest.java</h1><pre class="source lang-java linenums">package application;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
+import java.io.File;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.tobeagile.training.ebaby.services.AuctionLogger;
+import com.tobeagile.training.ebaby.services.Hours;
+import com.tobeagile.training.ebaby.services.PostOffice;
+
+import application.exception.AuctionIsNotStartedException;
+import application.exception.BadCredentialException;
+import application.exception.DuplicatedUserException;
+import application.exception.InvalidAuctionTimeException;
+import application.exception.InvalidBidException;
+import application.exception.NotAuthenticatedException;
+import application.exception.NotAuthorizedAsSellerException;
+import application.processor.CarTransactionLogProcessor;
+import application.processor.ExpensiveTransactionLogProcessor;
+import application.processor.OffHourLogProcessor;
+import application.processor.OnCloseProcessor;
+import application.processor.OnCloseProcessorFactory;
+
+<span class="fc" id="L30">public class AuctionTest {</span>
+
+    @Test
+    public void UsersCanRegisterUser() {
+<span class="fc" id="L34">        Users users = new Users();</span>
+
+<span class="fc" id="L36">        String firstName = &quot;Clark&quot;;</span>
+<span class="fc" id="L37">        String lastName = &quot;Kent&quot;;</span>
+<span class="fc" id="L38">        String userEmail = &quot;kent@example.com&quot;;</span>
+<span class="fc" id="L39">        String userName = &quot;k-clark&quot;;</span>
+<span class="fc" id="L40">        String password = &quot;PASSWORD&quot;;</span>
+<span class="fc" id="L41">        User user = new User(firstName, lastName, userEmail, userName, password);</span>
+<span class="fc" id="L42">        User registeredUser = users.register(user);</span>
+
+<span class="fc" id="L44">        assertThat(registeredUser.getFirstName(), is(firstName));</span>
+<span class="fc" id="L45">        assertThat(registeredUser.getLastName(), is(lastName));</span>
+<span class="fc" id="L46">        assertThat(registeredUser.getUserEmail(), is(userEmail));</span>
+<span class="fc" id="L47">        assertThat(registeredUser.getUserName(), is(userName));</span>
+<span class="fc" id="L48">        assertThat(registeredUser.getPassword(), is(password));</span>
+<span class="fc" id="L49">    }</span>
+
+    @Test
+    public void UsersCantRegisterSameNameUser() {
+<span class="fc" id="L53">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L54">        User user = TestHelper.getDefaultSeller();</span>
+        try {
+<span class="nc" id="L56">            users.register(user);</span>
+<span class="nc" id="L57">            Assert.fail(&quot;Users can't register same userName&quot;);</span>
+<span class="pc" id="L58">        } catch (DuplicatedUserException e) {</span>
+        }
+<span class="fc" id="L60">    }</span>
+
+    @Test
+    public void UserCanLogin() {
+<span class="fc" id="L64">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L65">        User user = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L66">        User logginedUser = users.login(user.getUserName(), user.getPassword());</span>
+<span class="fc" id="L67">        assertThat(logginedUser.isLoggedIn(), is(true));</span>
+
+<span class="fc" id="L69">    }</span>
+
+    @Test
+    public void UserCantLoginWithWrongPassword() {
+<span class="fc" id="L73">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L74">        User user = TestHelper.getDefaultSeller();</span>
+        try {
+<span class="nc" id="L76">            users.login(user.getUserName(), &quot;WRONG-PASSWORD&quot;);</span>
+<span class="nc" id="L77">            Assert.fail(&quot;Logged in with wrong password&quot;);</span>
+<span class="pc" id="L78">        } catch (BadCredentialException e) {</span>
+        }
+
+<span class="fc" id="L81">    }</span>
+
+    @Test
+    public void UserCantLoginWithoutRegistration() {
+<span class="fc" id="L85">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L86">        User user = TestHelper.getDefaultSeller();</span>
+        try {
+<span class="nc" id="L88">            users.login(&quot;wrong-userName&quot;, user.getPassword());</span>
+<span class="nc" id="L89">            Assert.fail(&quot;Logged in with wrong userName&quot;);</span>
+<span class="pc" id="L90">        } catch (BadCredentialException e) {</span>
+        }
+
+<span class="fc" id="L93">    }</span>
+
+    @Test
+    public void UserCanLogoutWhenLoggedIn() {
+<span class="fc" id="L97">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L98">        User user = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L99">        users.login(user.getUserName(), user.getPassword());</span>
+<span class="fc" id="L100">        users.logout(user.getUserName());</span>
+<span class="fc" id="L101">        assertThat(user.isLoggedIn(), is(false));</span>
+<span class="fc" id="L102">    }</span>
+
+    @Test
+    public void UserCantLogoutWhenNotLoggedIn() {
+<span class="fc" id="L106">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L107">        User user = TestHelper.getDefaultSeller();</span>
+        try {
+<span class="nc" id="L109">            users.logout(user.getUserName());</span>
+<span class="nc" id="L110">            Assert.fail(&quot;You can't logout when not logged in&quot;);</span>
+<span class="pc" id="L111">        } catch (NotAuthenticatedException e) {</span>
+        }
+<span class="fc" id="L113">    }</span>
+
+    @Test
+    public void UserIsNotASeller() {
+<span class="fc" id="L117">        User user = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L118">        assertThat(user.isSeller(), is(false));</span>
+<span class="fc" id="L119">    }</span>
+
+    @Test
+    public void UserIsASeller() {
+<span class="fc" id="L123">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L124">        User user = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L125">        users.promoteToSeller(user);</span>
+<span class="fc" id="L126">        User loggedinUser = users.login(user.getUserName(), user.getPassword());</span>
+<span class="fc" id="L127">        assertThat(loggedinUser.isSeller(), is(true));</span>
+<span class="fc" id="L128">    }</span>
+
+    @Test
+    public void SellerCanCreateAuction() {
+<span class="fc" id="L132">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L133">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L134">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+
+<span class="fc" id="L136">        String itemName = &quot;item-name&quot;;</span>
+<span class="fc" id="L137">        String itemDescription = &quot;item-description&quot;;</span>
+<span class="fc" id="L138">        ItemCategory itemCategory = ItemCategory.OTHER;</span>
+<span class="fc" id="L139">        Integer startingPrice = new Integer(1000);</span>
+<span class="fc" id="L140">        LocalDateTime startTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);</span>
+<span class="fc" id="L141">        LocalDateTime endTime = LocalDateTime.of(2020, 3, 11, 9, 59, 59);</span>
+<span class="fc" id="L142">        Auction auction = new Auction(seller, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);</span>
+
+<span class="fc" id="L144">        Auction createdAuction = seller.createAuction(auction);</span>
+
+<span class="fc" id="L146">        assertThat(createdAuction.getItemName(), is(itemName));</span>
+<span class="fc" id="L147">        assertThat(createdAuction.getSeller().getUserName(), is(seller.getUserName()));</span>
+<span class="fc" id="L148">        assertThat(createdAuction.getItemDescription(), is(itemDescription));</span>
+<span class="fc" id="L149">        assertThat(createdAuction.getStartingPrice(), is(startingPrice));</span>
+<span class="fc" id="L150">        assertThat(createdAuction.getStartTime(), is(startTime));</span>
+<span class="fc" id="L151">        assertThat(createdAuction.getEndTime(), is(endTime));</span>
+<span class="fc" id="L152">    }</span>
+
+    @Test
+    public void NotSellerCantCreateAuction() {
+<span class="fc" id="L156">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L157">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L158">        User loggedinUser = users.login(bidder.getUserName(), bidder.getPassword());</span>
+
+        try {
+<span class="nc" id="L161">            loggedinUser.createAuction(TestHelper.getDefaultAuction(loggedinUser));</span>
+<span class="nc" id="L162">            Assert.fail(&quot;Not seller can't create auction&quot;);</span>
+<span class="pc" id="L163">        } catch (NotAuthorizedAsSellerException e) {</span>
+        }
+<span class="fc" id="L165">    }</span>
+
+    @Test
+    public void SellerCantCreateAuctionWhenNotLoggedIn() {
+<span class="fc" id="L169">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L170">        User user = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L171">        users.promoteToSeller(user);</span>
+
+        try {
+<span class="nc" id="L174">            user.createAuction(TestHelper.getDefaultAuction(user));</span>
+<span class="nc" id="L175">            Assert.fail(&quot;Seller can't create auction when not logged in&quot;);</span>
+<span class="pc" id="L176">        } catch (NotAuthenticatedException e) {</span>
+        }
+<span class="fc" id="L178">    }</span>
+
+    @Test
+    public void ActionStartTimeMustBeInFuture() {
+<span class="fc" id="L182">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L183">        User user = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L184">        users.promoteToSeller(user);</span>
+<span class="fc" id="L185">        User loggedinUser = users.login(user.getUserName(), user.getPassword());</span>
+
+<span class="fc" id="L187">        String itemName = &quot;item-name&quot;;</span>
+<span class="fc" id="L188">        String itemDescription = &quot;item-description&quot;;</span>
+<span class="fc" id="L189">        ItemCategory itemCategory = ItemCategory.OTHER;</span>
+<span class="fc" id="L190">        Integer startingPrice = new Integer(1000);</span>
+<span class="fc" id="L191">        LocalDateTime startTime = LocalDateTime.of(2020, 3, 9, 9, 59, 59);</span>
+<span class="fc" id="L192">        LocalDateTime endTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);</span>
+<span class="fc" id="L193">        Auction auction =  new Auction(loggedinUser, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);</span>
+
+        try {
+<span class="fc" id="L196">            Auctions auctions = new MockedAuctions();</span>
+<span class="fc" id="L197">            auctions.setNow(LocalDateTime.of(2020, 3, 10, 9, 59, 59));</span>
+<span class="nc" id="L198">            auctions.create(auction);</span>
+<span class="nc" id="L199">            Assert.fail(&quot;Action start time must be in future&quot;);</span>
+<span class="pc" id="L200">        } catch (InvalidAuctionTimeException e) {</span>
+        }
+
+<span class="fc" id="L203">    }</span>
+
+    @Test
+    public void ActionEndTimeMustBeGreaterThanStartTime() {
+<span class="fc" id="L207">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L208">        User user = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L209">        users.promoteToSeller(user);</span>
+<span class="fc" id="L210">        User loggedinUser = users.login(user.getUserName(), user.getPassword());</span>
+
+<span class="fc" id="L212">        String itemName = &quot;item-name&quot;;</span>
+<span class="fc" id="L213">        String itemDescription = &quot;item-description&quot;;</span>
+<span class="fc" id="L214">        ItemCategory itemCategory = ItemCategory.OTHER;</span>
+<span class="fc" id="L215">        Integer startingPrice = new Integer(1000);</span>
+<span class="fc" id="L216">        LocalDateTime startTime = LocalDateTime.of(2020, 3, 11, 9, 59, 59);</span>
+<span class="fc" id="L217">        LocalDateTime endTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);</span>
+<span class="fc" id="L218">        Auction auction =  new Auction(loggedinUser, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);</span>
+
+        try {
+<span class="fc" id="L221">            Auctions auctions = new Auctions();</span>
+<span class="nc" id="L222">            auctions.create(auction);</span>
+<span class="nc" id="L223">            Assert.fail(&quot;Action end time must be greater than start time&quot;);</span>
+<span class="pc" id="L224">        } catch (InvalidAuctionTimeException e) {</span>
+        }
+
+<span class="fc" id="L227">    }</span>
+
+    @Test
+    public void ActionEndTimeMustNotBeSameAsStartTime() {
+<span class="fc" id="L231">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L232">        User user = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L233">        users.promoteToSeller(user);</span>
+<span class="fc" id="L234">        User loggedinUser = users.login(user.getUserName(), user.getPassword());</span>
+
+<span class="fc" id="L236">        String itemName = &quot;item-name&quot;;</span>
+<span class="fc" id="L237">        String itemDescription = &quot;item-description&quot;;</span>
+<span class="fc" id="L238">        ItemCategory itemCategory = ItemCategory.OTHER;</span>
+<span class="fc" id="L239">        Integer startingPrice = new Integer(1000);</span>
+<span class="fc" id="L240">        LocalDateTime sameTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);</span>
+<span class="fc" id="L241">        Auction auction = new Auction(loggedinUser, itemName, itemDescription, itemCategory, startingPrice, sameTime, sameTime);</span>
+
+        try {
+<span class="fc" id="L244">            Auctions auctions = new Auctions();</span>
+<span class="nc" id="L245">            auctions.create(auction);</span>
+<span class="nc" id="L246">            Assert.fail(&quot;Action end time must not be same as start time&quot;);</span>
+<span class="pc" id="L247">        } catch (InvalidAuctionTimeException e) {</span>
+        }
+<span class="fc" id="L249">    }</span>
+
+    @Test
+    public void AuctionCanStart() {
+<span class="fc" id="L253">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L254">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L255">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+
+<span class="fc" id="L257">        Auction createdAuction = TestHelper.getDefaultAuction(seller);</span>
+
+<span class="fc" id="L259">        assertThat(createdAuction.getStatus(), is(AuctionStatus.UNSTARTED));</span>
+
+<span class="fc" id="L261">        createdAuction.onStart();</span>
+
+<span class="fc" id="L263">        assertThat(createdAuction.getStatus(), is(AuctionStatus.STARTED));</span>
+
+<span class="fc" id="L265">    }</span>
+
+    @Test
+    public void AuctionCanClose() {
+<span class="fc" id="L269">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L270">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L271">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+
+<span class="fc" id="L273">        Auction createdAuction = TestHelper.getDefaultAuction(seller);</span>
+
+<span class="fc" id="L275">        assertThat(createdAuction.getStatus(), is(AuctionStatus.UNSTARTED));</span>
+
+<span class="fc" id="L277">        createdAuction.onStart();</span>
+<span class="fc" id="L278">        createdAuction.onClose();</span>
+
+<span class="fc" id="L280">        assertThat(createdAuction.getStatus(), is(AuctionStatus.CLOSED));</span>
+<span class="fc" id="L281">    }</span>
+
+    @Test
+    public void AuthenticatedBidderCanBidStartedAuction() {
+<span class="fc" id="L285">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L286">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L287">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+
+<span class="fc" id="L289">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L290">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+
+<span class="fc" id="L292">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L293">        auction.onStart();</span>
+
+<span class="fc" id="L295">        Integer bidPrice = new Integer(2000);</span>
+<span class="fc" id="L296">        bidder.offerBid(auction, bidPrice);</span>
+<span class="fc" id="L297">        assertThat(auction.getHighestBidder(), is(bidder));</span>
+<span class="fc" id="L298">        assertThat(auction.getHighestPrice(), is(bidPrice));</span>
+<span class="fc" id="L299">    }</span>
+
+    @Test
+    public void UnauthenticatedBidderCantBidStartedAuction() {
+<span class="fc" id="L303">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L304">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L305">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+
+<span class="fc" id="L307">        User bidder = TestHelper.getDefaultBidder();</span>
+
+<span class="fc" id="L309">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L310">        auction.onStart();</span>
+
+<span class="fc" id="L312">        Integer bidPrice = new Integer(2000);</span>
+        try {
+<span class="nc" id="L314">            bidder.offerBid(auction, bidPrice);</span>
+<span class="nc" id="L315">            Assert.fail(&quot;Unauthenticated bidder can't bid started auction&quot;);</span>
+<span class="pc" id="L316">        } catch (NotAuthenticatedException e) {</span>
+        }
+<span class="fc" id="L318">    }</span>
+
+    @Test
+    public void AuthenticatedBidderCantBidUnstartedAuction() {
+<span class="fc" id="L322">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L323">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L324">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+
+<span class="fc" id="L326">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L327">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+
+<span class="fc" id="L329">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+
+<span class="fc" id="L331">        Integer bidPrice = new Integer(2000);</span>
+        try {
+<span class="nc" id="L333">            bidder.offerBid(auction, bidPrice);</span>
+<span class="nc" id="L334">            Assert.fail(&quot;Unstarted auction can't be bid&quot;);</span>
+<span class="pc" id="L335">        } catch (AuctionIsNotStartedException e) {</span>
+        }
+<span class="fc" id="L337">    }</span>
+
+    @Test
+    public void AuthenticatedBidderCantBidLowerThanStartingPrice() {
+<span class="fc" id="L341">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L342">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L343">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+
+<span class="fc" id="L345">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L346">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+
+<span class="fc" id="L348">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L349">        auction.onStart();</span>
+
+        try {
+<span class="fc" id="L352">            Integer lowerPrice = new Integer(999);</span>
+<span class="nc" id="L353">            bidder.offerBid(auction, lowerPrice);</span>
+<span class="nc" id="L354">            Assert.fail(&quot;Bidder can't bid lower price than starting price.&quot;);</span>
+<span class="pc" id="L355">        } catch (InvalidBidException e) {</span>
+        }
+<span class="fc" id="L357">    }</span>
+
+    @Test
+    public void AuthenticatedBidderCantBidLowerPrice() {
+<span class="fc" id="L361">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L362">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L363">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+
+<span class="fc" id="L365">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L366">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+
+<span class="fc" id="L368">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L369">        auction.onStart();</span>
+
+<span class="fc" id="L371">        Integer bidPrice = new Integer(2000);</span>
+<span class="fc" id="L372">        bidder.offerBid(auction, bidPrice);</span>
+
+        try {
+<span class="fc" id="L375">            Integer lowerPrice = new Integer(1999);</span>
+<span class="nc" id="L376">            bidder.offerBid(auction, lowerPrice);</span>
+<span class="nc" id="L377">            Assert.fail(&quot;Bidder can't bid lower price.&quot;);</span>
+<span class="pc" id="L378">        } catch (InvalidBidException e) {</span>
+        }
+<span class="fc" id="L380">    }</span>
+
+    @Test
+    public void AuthenticatedBidderCantBidOwnAuction() {
+<span class="fc" id="L384">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L385">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L386">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+
+<span class="fc" id="L388">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L389">        auction.onStart();</span>
+
+        try {
+<span class="fc" id="L392">            Integer lowerPrice = new Integer(2000);</span>
+<span class="nc" id="L393">            seller.offerBid(auction, lowerPrice);</span>
+<span class="nc" id="L394">            Assert.fail(&quot;Bidder can't bid own auction.&quot;);</span>
+<span class="pc" id="L395">        } catch (InvalidBidException e) {</span>
+        }
+<span class="fc" id="L397">    }</span>
+
+    @Test
+    public void AuctionClosedWithoutBidNotifyToSeller() {
+<span class="fc" id="L401">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L402">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L403">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L404">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L405">        auction.onStart();</span>
+<span class="fc" id="L406">        PostOffice postOffice = PostOffice.getInstance();</span>
+<span class="fc" id="L407">        postOffice.clear();</span>
+<span class="fc" id="L408">        auction.onClose();</span>
+<span class="fc" id="L409">        assertThat(</span>
+<span class="fc" id="L410">                postOffice.findEmail(seller.getUserEmail(), &quot;Sorry, your auction for &lt;item-name&gt; did not have any bidders&quot;),</span>
+<span class="fc" id="L411">                is(&quot;&lt;sendEMail address=\&quot;kent@example.com\&quot; &gt;Sorry, your auction for &lt;item-name&gt; did not have any bidders&lt;/sendEmail&gt;\n&quot;));</span>
+<span class="fc" id="L412">    }</span>
+
+    @Test
+    public void AuctionClosedWithBidNotifyToSeller() {
+<span class="fc" id="L416">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L417">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L418">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L419">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L420">        auction.onStart();</span>
+
+<span class="fc" id="L422">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L423">        Integer bidPrice = new Integer(2000);</span>
+<span class="fc" id="L424">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L425">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L427">        PostOffice postOffice = PostOffice.getInstance();</span>
+<span class="fc" id="L428">        postOffice.clear();</span>
+<span class="fc" id="L429">        auction.onClose();</span>
+<span class="fc" id="L430">        assertThat(</span>
+<span class="fc" id="L431">                postOffice.findEmail(seller.getUserEmail(),</span>
+<span class="fc" id="L432">                        &quot;Your &lt;item-name&gt; auction sold to bidder &lt;kinoshita@example.com&gt; for &lt;2000&gt;.&quot;),</span>
+<span class="fc" id="L433">                is(&quot;&lt;sendEMail address=\&quot;kent@example.com\&quot; &gt;Your &lt;item-name&gt; auction sold to bidder &lt;kinoshita@example.com&gt; for &lt;2000&gt;.&lt;/sendEmail&gt;\n&quot;));</span>
+<span class="fc" id="L434">    }</span>
+
+    @Test
+    public void AuctionClosedWithBidNotifyToHighestBidder() {
+<span class="fc" id="L438">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L439">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L440">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L441">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L442">        auction.onStart();</span>
+
+<span class="fc" id="L444">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L445">        Integer bidPrice = new Integer(2000);</span>
+<span class="fc" id="L446">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L447">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L449">        PostOffice postOffice = PostOffice.getInstance();</span>
+<span class="fc" id="L450">        postOffice.clear();</span>
+<span class="fc" id="L451">        auction.onClose();</span>
+<span class="fc" id="L452">        assertThat(</span>
+<span class="fc" id="L453">                postOffice.findEmail(bidder.getUserEmail(),</span>
+<span class="fc" id="L454">                        &quot;Congratulations! You won an auction for a &lt;item-name&gt; from &lt;kent@example.com&gt; for &lt;2000&gt;.&quot;),</span>
+<span class="fc" id="L455">                is(&quot;&lt;sendEMail address=\&quot;kinoshita@example.com\&quot; &gt;Congratulations! You won an auction for a &lt;item-name&gt; from &lt;kent@example.com&gt; for &lt;2000&gt;.&lt;/sendEmail&gt;\n&quot;));</span>
+<span class="fc" id="L456">    }</span>
+
+    @Test
+    public void CalculateSallerAmount() {
+<span class="fc" id="L460">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L461">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L462">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L463">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L464">        auction.onStart();</span>
+
+<span class="fc" id="L466">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L467">        Integer bidPrice = new Integer(1999);</span>
+<span class="fc" id="L468">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L469">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L471">        auction.onClose();</span>
+<span class="fc" id="L472">        assertThat(auction.getSellerAmount(), is(new BigDecimal(1960)));</span>
+<span class="fc" id="L473">    }</span>
+
+    @Test
+    public void CalculateBidderAmountForDownloadSoftware() {
+<span class="fc" id="L477">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L478">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L479">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L480">        Auction auction = TestHelper.getDownloadSoftwareAuction(seller);</span>
+<span class="fc" id="L481">        auction.onStart();</span>
+
+<span class="fc" id="L483">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L484">        Integer bidPrice = new Integer(2000);</span>
+<span class="fc" id="L485">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L486">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L488">        auction.onClose();</span>
+<span class="fc" id="L489">        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice)));</span>
+<span class="fc" id="L490">    }</span>
+
+    @Test
+    public void CalculateBidderAmountForOther() {
+<span class="fc" id="L494">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L495">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L496">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L497">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L498">        auction.onStart();</span>
+
+<span class="fc" id="L500">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L501">        Integer bidPrice = new Integer(2000);</span>
+<span class="fc" id="L502">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L503">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L505">        auction.onClose();</span>
+<span class="fc" id="L506">        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice + 10)));</span>
+<span class="fc" id="L507">    }</span>
+
+    @Test
+    public void CalculateBidderAmountForCheapCar() {
+<span class="fc" id="L511">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L512">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L513">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L514">        Auction auction = TestHelper.getCarAuction(seller);</span>
+<span class="fc" id="L515">        auction.onStart();</span>
+
+<span class="fc" id="L517">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L518">        Integer bidPrice = new Integer(49999);</span>
+<span class="fc" id="L519">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L520">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L522">        auction.onClose();</span>
+<span class="fc" id="L523">        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice + 1000)));</span>
+<span class="fc" id="L524">    }</span>
+
+    @Test
+    public void CalculateBidderAmountForExpensiveCar() {
+<span class="fc" id="L528">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L529">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L530">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L531">        Auction auction = TestHelper.getCarAuction(seller);</span>
+<span class="fc" id="L532">        auction.onStart();</span>
+
+<span class="fc" id="L534">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L535">        Integer bidPrice = new Integer(50001);</span>
+<span class="fc" id="L536">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L537">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L539">        auction.onClose();</span>
+<span class="fc" id="L540">        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice + 1000 + 2000)));</span>
+<span class="fc" id="L541">    }</span>
+
+    @Test
+    public void CarTransactionIsLoggedToCarLog() {
+<span class="fc" id="L545">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L546">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L547">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L548">        Auction auction = TestHelper.getCarAuction(seller);</span>
+<span class="fc" id="L549">        auction.onStart();</span>
+
+<span class="fc" id="L551">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L552">        Integer bidPrice = new Integer(50001);</span>
+<span class="fc" id="L553">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L554">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L556">        String fileName = &quot;C:\\workspace\\eBaby\\log\\car-transaction.log&quot;;</span>
+<span class="fc" id="L557">        cleanUpLogfile(fileName);</span>
+
+<span class="fc" id="L559">        auction.onClose();</span>
+
+<span class="fc" id="L561">        String message = String.format(&quot;itemName:%s seller:%s bidder:%s bidPrice:%s&quot;,</span>
+<span class="fc" id="L562">                &quot;item-name-car&quot;,</span>
+<span class="fc" id="L563">                &quot;k-clark&quot;,</span>
+<span class="fc" id="L564">                &quot;e-kinoshita&quot;,</span>
+<span class="fc" id="L565">                bidPrice);</span>
+
+<span class="fc" id="L567">        AuctionLogger logger = AuctionLogger.getInstance();</span>
+<span class="fc" id="L568">        assertThat(logger.findMessage(fileName, message), is(true));</span>
+<span class="fc" id="L569">    }</span>
+
+    @Test
+    public void OtherTransactionIsNotLoggedToCarLog() {
+<span class="fc" id="L573">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L574">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L575">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L576">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L577">        auction.onStart();</span>
+
+<span class="fc" id="L579">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L580">        Integer bidPrice = new Integer(50001);</span>
+<span class="fc" id="L581">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L582">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L584">        CarTransactionLogProcessor processor = new CarTransactionLogProcessor(null);</span>
+<span class="fc" id="L585">        String fileName = processor.getFileName();</span>
+<span class="fc" id="L586">        cleanUpLogfile(fileName);</span>
+
+<span class="fc" id="L588">        auction.onClose();</span>
+
+<span class="fc" id="L590">        assertThat(new File(fileName).exists(), is(false));</span>
+<span class="fc" id="L591">    }</span>
+
+    @Test
+    public void ExpensiveTransactionIsLogged() {
+<span class="fc" id="L595">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L596">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L597">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L598">        Auction auction = TestHelper.getCarAuction(seller);</span>
+<span class="fc" id="L599">        auction.onStart();</span>
+
+<span class="fc" id="L601">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L602">        Integer bidPrice = new Integer(10000);</span>
+<span class="fc" id="L603">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L604">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L606">        AuctionLogger logger = AuctionLogger.getInstance();</span>
+<span class="fc" id="L607">        String fileName = &quot;C:\\workspace\\eBaby\\log\\expensive-transaction.log&quot;;</span>
+<span class="fc" id="L608">        cleanUpLogfile(fileName);</span>
+
+<span class="fc" id="L610">        auction.onClose();</span>
+
+<span class="fc" id="L612">        String message = String.format(&quot;itemName:%s seller:%s bidder:%s bidPrice:%s&quot;,</span>
+<span class="fc" id="L613">                &quot;item-name-car&quot;,</span>
+<span class="fc" id="L614">                &quot;k-clark&quot;,</span>
+<span class="fc" id="L615">                &quot;e-kinoshita&quot;,</span>
+<span class="fc" id="L616">                bidPrice);</span>
+
+<span class="fc" id="L618">        assertThat(logger.findMessage(fileName, message), is(true));</span>
+<span class="fc" id="L619">    }</span>
+
+    @Test
+    public void CheapTransactionIsNotLogged() {
+<span class="fc" id="L623">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L624">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L625">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L626">        Auction auction = TestHelper.getCarAuction(seller);</span>
+<span class="fc" id="L627">        auction.onStart();</span>
+
+<span class="fc" id="L629">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L630">        Integer bidPrice = new Integer(9999);</span>
+<span class="fc" id="L631">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L632">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L634">        ExpensiveTransactionLogProcessor processor = new ExpensiveTransactionLogProcessor(null);</span>
+<span class="fc" id="L635">        String fileName = processor.getFileName();</span>
+<span class="fc" id="L636">        cleanUpLogfile(fileName);</span>
+
+<span class="fc" id="L638">        auction.onClose();</span>
+
+<span class="fc" id="L640">        assertThat(new File(fileName).exists(), is(false));</span>
+<span class="fc" id="L641">    }</span>
+
+    @Test
+    public void ShippingFeeOfPreferredSellerIsFreeWhenPriceIsOverThan50() {
+<span class="fc" id="L645">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L646">        User seller = TestHelper.getPreferredSeller();</span>
+<span class="fc" id="L647">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L648">        Auction auction = TestHelper.getCheapAuction(seller);</span>
+<span class="fc" id="L649">        auction.onStart();</span>
+
+<span class="fc" id="L651">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L652">        Integer bidPrice = new Integer(50);</span>
+<span class="fc" id="L653">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L654">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L656">        auction.onClose();</span>
+
+<span class="fc" id="L658">        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice)));</span>
+<span class="fc" id="L659">    }</span>
+
+    @Test
+    public void ShippingFeeOfPreferredSellerIsNotFreeWhenPriceIsLessThan50() {
+<span class="fc" id="L663">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L664">        User seller = TestHelper.getPreferredSeller();</span>
+<span class="fc" id="L665">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L666">        Auction auction = TestHelper.getCheapAuction(seller);</span>
+<span class="fc" id="L667">        auction.onStart();</span>
+
+<span class="fc" id="L669">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L670">        Integer bidPrice = new Integer(49);</span>
+<span class="fc" id="L671">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L672">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L674">        auction.onClose();</span>
+
+<span class="fc" id="L676">        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice + 10)));</span>
+<span class="fc" id="L677">    }</span>
+
+    @Test
+    public void ShippingFeeOfPreferredSellerIsHalfForCar() {
+<span class="fc" id="L681">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L682">        User seller = TestHelper.getPreferredSeller();</span>
+<span class="fc" id="L683">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L684">        Auction auction = TestHelper.getCarAuction(seller);</span>
+<span class="fc" id="L685">        auction.onStart();</span>
+
+<span class="fc" id="L687">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L688">        Integer bidPrice = new Integer(2000);</span>
+<span class="fc" id="L689">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L690">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L692">        auction.onClose();</span>
+
+<span class="fc" id="L694">        assertThat(auction.getBidderAmount(), is(new BigDecimal(bidPrice + 1000 / 2)));</span>
+<span class="fc" id="L695">    }</span>
+
+    @Test
+    public void TransactionFeeOfPreferredSellerIs1Percent() {
+<span class="fc" id="L699">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L700">        User seller = TestHelper.getPreferredSeller();</span>
+<span class="fc" id="L701">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L702">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L703">        auction.onStart();</span>
+
+<span class="fc" id="L705">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L706">        Integer bidPrice = new Integer(2000);</span>
+<span class="fc" id="L707">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L708">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L710">        auction.onClose();</span>
+
+<span class="fc" id="L712">        assertThat(auction.getSellerAmount(), is(new BigDecimal(bidPrice - 20)));</span>
+<span class="fc" id="L713">    }</span>
+
+    @Test
+    public void LoggingWhenOffHours() {
+<span class="fc" id="L717">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L718">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L719">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L720">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L721">        auction.onStart();</span>
+
+<span class="fc" id="L723">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L724">        Integer bidPrice = new Integer(2000);</span>
+<span class="fc" id="L725">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L726">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L728">        AuctionLogger logger = AuctionLogger.getInstance();</span>
+<span class="fc" id="L729">        String fileName = &quot;C:\\workspace\\eBaby\\log\\offhour-transaction.log&quot;;</span>
+<span class="fc" id="L730">        logger.clearLog(fileName);</span>
+
+<span class="fc" id="L732">        OnCloseProcessor processor = OnCloseProcessorFactory.getProcessor(auction, new MockOffHours(true));</span>
+<span class="fc" id="L733">        processor.process(auction);</span>
+
+<span class="fc" id="L735">        String message = String.format(&quot;itemName:%s seller:%s bidder:%s bidPrice:%s&quot;,</span>
+<span class="fc" id="L736">                &quot;item-name&quot;,</span>
+<span class="fc" id="L737">                &quot;k-clark&quot;,</span>
+<span class="fc" id="L738">                &quot;e-kinoshita&quot;,</span>
+<span class="fc" id="L739">                bidPrice);</span>
+
+<span class="fc" id="L741">        assertThat(logger.findMessage(fileName, message), is(true));</span>
+
+<span class="fc" id="L743">    }</span>
+
+    @Test
+    public void NoLoggingWhenOnHours() {
+<span class="fc" id="L747">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L748">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L749">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L750">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+<span class="fc" id="L751">        auction.onStart();</span>
+
+<span class="fc" id="L753">        User bidder = TestHelper.getDefaultBidder();</span>
+<span class="fc" id="L754">        Integer bidPrice = new Integer(2000);</span>
+<span class="fc" id="L755">        bidder = users.login(bidder.getUserName(), bidder.getPassword());</span>
+<span class="fc" id="L756">        bidder.offerBid(auction, bidPrice);</span>
+
+<span class="fc" id="L758">        String fileName = new OffHourLogProcessor(null, null).getFileName();</span>
+<span class="fc" id="L759">        cleanUpLogfile(fileName);</span>
+
+<span class="fc" id="L761">        OnCloseProcessor processor = OnCloseProcessorFactory.getProcessor(auction, new MockOffHours(false));</span>
+<span class="fc" id="L762">        processor.process(auction);</span>
+
+<span class="fc" id="L764">        assertThat(new File(fileName).exists(), is(false));</span>
+
+<span class="fc" id="L766">    }</span>
+
+    @Test
+    public void AuctionIsNotStartedBeforeStartTime() {
+<span class="fc" id="L770">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L771">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L772">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L773">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+
+<span class="fc" id="L775">        Auctions auctions = new Auctions();</span>
+<span class="fc" id="L776">        auctions.create(auction);</span>
+
+<span class="fc" id="L778">        AuctionTimer timer = new AuctionTimer();</span>
+<span class="fc" id="L779">        timer.checkAuction(auctions);</span>
+
+<span class="fc" id="L781">        long now = TestHelper.ldtToEpochMilliSecond(auction.getStartTime()) - 1000;</span>
+<span class="fc" id="L782">        timer.timerTick(now);</span>
+
+<span class="fc" id="L784">        Auction handledAuction = auctions.getList().get(0);</span>
+<span class="fc" id="L785">        assertThat(handledAuction.getStatus(), is(AuctionStatus.UNSTARTED));</span>
+<span class="fc" id="L786">    }</span>
+
+    @Test
+    public void AuctionIsStartedBetweenWindowTime() {
+<span class="fc" id="L790">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L791">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L792">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L793">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+
+<span class="fc" id="L795">        Auctions auctions = new Auctions();</span>
+<span class="fc" id="L796">        auctions.create(auction);</span>
+
+<span class="fc" id="L798">        AuctionTimer timer = new AuctionTimer();</span>
+<span class="fc" id="L799">        timer.checkAuction(auctions);</span>
+
+<span class="fc" id="L801">        long now = TestHelper.ldtToEpochMilliSecond(auction.getStartTime()) + 1000;</span>
+<span class="fc" id="L802">        timer.timerTick(now);</span>
+
+<span class="fc" id="L804">        Auction handledAuction = auctions.getList().get(0);</span>
+<span class="fc" id="L805">        assertThat(handledAuction.getStatus(), is(AuctionStatus.STARTED));</span>
+<span class="fc" id="L806">    }</span>
+
+    @Test
+    public void AuctionIsClosedAfterWindowTime() {
+<span class="fc" id="L810">        Users users = TestHelper.setUpUsers();</span>
+<span class="fc" id="L811">        User seller = TestHelper.getDefaultSeller();</span>
+<span class="fc" id="L812">        seller = users.login(seller.getUserName(), seller.getPassword());</span>
+<span class="fc" id="L813">        Auction auction = TestHelper.getDefaultAuction(seller);</span>
+
+<span class="fc" id="L815">        Auctions auctions = new Auctions();</span>
+<span class="fc" id="L816">        auctions.create(auction);</span>
+
+<span class="fc" id="L818">        AuctionTimer timer = new AuctionTimer();</span>
+<span class="fc" id="L819">        timer.checkAuction(auctions);</span>
+
+<span class="fc" id="L821">        long now = TestHelper.ldtToEpochMilliSecond(auction.getEndTime()) + 1000;</span>
+<span class="fc" id="L822">        timer.timerTick(now);</span>
+
+<span class="fc" id="L824">        Auction handledAuction = auctions.getList().get(0);</span>
+<span class="fc" id="L825">        assertThat(handledAuction.getStatus(), is(AuctionStatus.CLOSED));</span>
+<span class="fc" id="L826">    }</span>
+
+    private void cleanUpLogfile(String fileName) {
+<span class="pc bpc" id="L829" title="1 of 2 branches missed.">        if (new File(fileName).exists()) {</span>
+<span class="fc" id="L830">            AuctionLogger logger = AuctionLogger.getInstance();</span>
+<span class="fc" id="L831">            logger.clearLog(fileName);</span>
+        }
+<span class="fc" id="L833">    }</span>
+
+<span class="fc" id="L835">    class MockedAuctions extends Auctions {</span>
+        private LocalDateTime now;
+
+        public LocalDateTime now() {
+<span class="fc" id="L839">            return this.now;</span>
+        }
+
+        public void setNow(LocalDateTime ldt) {
+<span class="fc" id="L843">            this.now = ldt;</span>
+<span class="fc" id="L844">        }</span>
+    }
+
+    class MockOffHours implements Hours {
+        boolean returnValue;
+
+<span class="fc" id="L850">        public MockOffHours(boolean returnValue) {</span>
+<span class="fc" id="L851">            this.returnValue = returnValue;</span>
+<span class="fc" id="L852">        }</span>
+
+        public boolean isOffHours() {
+<span class="fc" id="L855">            return returnValue;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>AuctionTest (2020/03/09 21:36:44)</div></body></html>

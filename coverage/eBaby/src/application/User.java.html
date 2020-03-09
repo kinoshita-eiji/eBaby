@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">AuctionTest (2020/03/09 21:36:44)</a> &gt; <a href="../../index.html" class="el_group">eBaby</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">application</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package application;
+
+import application.exception.NotAuthenticatedException;
+import application.role.Bidder;
+import application.role.Role;
+
+public class User {
+    private String firstName;
+    private String lastName;
+    private String userEmail;
+    private String userName;
+    private String password;
+    private boolean isLoggedIn;
+    private Role role;
+
+    public String getFirstName() {
+<span class="fc" id="L17">        return firstName;</span>
+    }
+
+    public String getLastName() {
+<span class="fc" id="L21">        return lastName;</span>
+    }
+
+    public String getUserEmail() {
+<span class="fc" id="L25">        return userEmail;</span>
+    }
+
+    public String getUserName() {
+<span class="fc" id="L29">        return userName;</span>
+    }
+
+    public String getPassword() {
+<span class="fc" id="L33">        return password;</span>
+    }
+
+    public boolean isLoggedIn() {
+<span class="fc" id="L37">        return isLoggedIn;</span>
+    }
+
+    public void setLoggedIn(boolean isLoggedIn) {
+<span class="fc" id="L41">        this.isLoggedIn = isLoggedIn;</span>
+<span class="fc" id="L42">    }</span>
+
+    public Role getRole() {
+<span class="fc" id="L45">        return role;</span>
+    }
+
+    public void setRole(Role role) {
+<span class="fc" id="L49">        this.role = role;</span>
+<span class="fc" id="L50">    }</span>
+
+<span class="fc" id="L52">    User(String firstName, String lastName, String userEmail, String userName, String password) {</span>
+<span class="fc" id="L53">        this.firstName = firstName;</span>
+<span class="fc" id="L54">        this.lastName = lastName;</span>
+<span class="fc" id="L55">        this.userEmail = userEmail;</span>
+<span class="fc" id="L56">        this.userName = userName;</span>
+<span class="fc" id="L57">        this.password = password;</span>
+<span class="fc" id="L58">        this.role = new Bidder();</span>
+<span class="fc" id="L59">    }</span>
+
+    public Auction createAuction(Auction auction) {
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        if (!this.isLoggedIn) {</span>
+<span class="fc" id="L63">            throw new NotAuthenticatedException(&quot;You are not logged in&quot;);</span>
+        }
+<span class="fc" id="L65">        auction.setSeller(this);</span>
+<span class="fc" id="L66">        return getRole().createAuction(auction);</span>
+    }
+
+    public void offerBid(Auction auction, Integer price) {
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (!this.isLoggedIn) {</span>
+<span class="fc" id="L71">            throw new NotAuthenticatedException(&quot;You are not logged in&quot;);</span>
+        }
+
+<span class="fc" id="L74">        Bid bid = new Bid(this, price);</span>
+<span class="fc" id="L75">        getRole().offerBid(auction, bid);</span>
+
+<span class="fc" id="L77">    }</span>
+
+    public boolean isSeller() {
+<span class="fc" id="L80">        return getRole().isSeller();</span>
+    }
+
+    public boolean isPreferredSeller() {
+<span class="fc" id="L84">        return getRole().isPreferredSeller();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span>AuctionTest (2020/03/09 21:36:44)</div></body></html>
