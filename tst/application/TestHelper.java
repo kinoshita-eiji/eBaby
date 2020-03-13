@@ -41,8 +41,8 @@ public class TestHelper {
         String itemDescription = "説明文";
         ItemCategory itemCategory = ItemCategory.OTHER;
         Integer startingPrice = new Integer(1000);
-        LocalDateTime startTime = LocalDateTime.of(2020, 3, 10, 10, 0, 0);
-        LocalDateTime endTime = LocalDateTime.of(2020, 3, 11, 9, 59, 59);
+        LocalDateTime startTime = LocalDateTime.of(3020, 3, 10, 10, 0, 0);
+        LocalDateTime endTime = LocalDateTime.of(3020, 3, 11, 9, 59, 59);
         return new Auction(loggedinUser, itemName, itemDescription, itemCategory, startingPrice, startTime, endTime);
     }
 
